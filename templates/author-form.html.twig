@@ -5,5 +5,19 @@
 {% endblock %}
 
 {% block body %}
-  {{ content }}
+  <div class="container">
+    <h1 class="my-3">{% if mode == 'create' %}Add new author{% else %}Edit {{ author.name }}{% endif %}</h1>
+    <form method="POST" action="/save/author">
+      <input type="hidden" name="action" value="{% if mode == 'create' %}insert{% else %}update{% endif %}">
+      <input type="hidden" name="id" value="{{ author.id }}">
+      <div class="form-group row">
+        <label for="name" class="col-2 col-form-label text-right">Name</label>
+        <div class="col-5">
+          <input type="text" class="form-control" id="name" name="name" autocomplete="off" value="{{ author.name }}">
+        </div>
+        <div class="col-5">
+          <button type="submit" class="btn btn-success">Save</button>
+        </div>
+      </div>
+    </form>
 {% endblock %}
