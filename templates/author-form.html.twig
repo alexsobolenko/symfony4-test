@@ -5,45 +5,44 @@
 {% endblock %}
 
 {% block body %}
-  <div class="container">
-    <h1 class="my-3">{% if mode == 'create' %}Add new author{% else %}Edit {{ author.name }}{% endif %}</h1>
-    <form method="POST" action="/save/author">
-      <input type="hidden" name="action" value="{% if mode == 'create' %}insert{% else %}update{% endif %}">
-      <input type="hidden" name="id" value="{{ author.id }}">
-      <div class="form-group row">
-        <label for="name" class="col-2 col-form-label text-right">Name</label>
-        <div class="col-5">
-          <input type="text" class="form-control" id="name" name="name" autocomplete="off" value="{{ author.name }}">
-        </div>
-        <div class="col-5">
-          <button type="submit" class="btn btn-success">Save</button>
-          {% if mode != 'create' %}
-            <button class="btn btn-danger" data-toggle="modal" data-target="#modal{{ author.id }}">Delete</button>
-          {% endif %}
-        </div>
+  <h1 class="my-3">{% if mode == 'create' %}Add new author{% else %}Edit {{ author.name }}{% endif %}</h1>
+  <form method="POST" action="/save/author">
+    <input type="hidden" name="action" value="{% if mode == 'create' %}insert{% else %}update{% endif %}">
+    <input type="hidden" name="id" value="{{ author.id }}">
+    <div class="form-group row">
+      <label for="name" class="col-2 col-form-label text-right">Name</label>
+      <div class="col-5">
+        <input type="text" class="form-control" id="name" name="name" autocomplete="off" value="{{ author.name }}">
       </div>
-    </form>
-    {% if mode != 'create' %}
-      <div class="modal fade" id="modal{{ author.id }}" role="dialog">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">Delete author</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <i class="fas fa-times"></i>
-              </button>
-            </div>
-            <div class="modal-body">
-              Delete "{{ author.name }}"?
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-              <form method="POST" action="/delete/author/{{ author.id }}">
-                <button type="submit" class="btn btn-primary">OK</button>
-              </form>
-            </div>
+      <div class="col-5">
+        <button type="submit" class="btn btn-success">Save</button>
+        {% if mode != 'create' %}
+          <button class="btn btn-danger" data-toggle="modal" data-target="#modal{{ author.id }}">Delete</button>
+        {% endif %}
+      </div>
+    </div>
+  </form>
+  {% if mode != 'create' %}
+    <div class="modal fade" id="modal{{ author.id }}" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Delete author</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            Delete "{{ author.name }}"?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <form method="POST" action="/delete/author/{{ author.id }}">
+              <button type="submit" class="btn btn-primary">OK</button>
+            </form>
           </div>
         </div>
       </div>
-    {% endif %}
+    </div>
+  {% endif %}
 {% endblock %}

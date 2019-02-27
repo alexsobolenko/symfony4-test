@@ -7,7 +7,17 @@
   {% block stylesheets %}{% endblock %}
 </head>
 <body>
-  {% block body %}{% endblock %}
+  <div class="container">
+    <ul class="nav">
+      <li class="nav-item">
+        <a class="nav-link" href="/list/authors">Authors</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/list/books">Books</a>
+      </li>
+    </ul>
+    {% block body %}{% endblock %}
+  </div>
   <script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
   <script src="//stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
