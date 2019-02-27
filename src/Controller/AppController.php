@@ -49,6 +49,11 @@ class AppController extends AbstractController {
     $author = $this->getDoctrine()->getRepository(Author::class)->find($id);
     $entityManager->remove($author);
     $entityManager->flush();
+    $books = $this->getDoctrine()->getRepository(Book::class)->findBy(['author' => $id]);
+    foreach ($books as $book) {
+      $entityManager->remove($book);
+      $entityManager->flush();
+    }
     return $this->redirect("/list/authors");
   }
 
@@ -114,6 +119,12 @@ class AppController extends AbstractController {
   public function bookDelete($id) {
     $entityManager = $this->getDoctrine()->getManager();
     $book = $this->getDoctrine()->getRepository(Book::class)->find($id);
+    $author = $this->getDoctrine()->getRepository(Author::class)->find($book->getAuthor());
+    if ($author->getBooks() > 0) {
+      $author->setBooks($author->getBooks() - 1);
+      $entityManager->persist($author);
+      $entityManager->flush();
+    }
     $entityManager->remove($book);
     $entityManager->flush();
     return $this->redirect("/list/books");
