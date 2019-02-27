@@ -1,7 +1,7 @@
 # SYMFONY 4 test task
 1. Install project:
 ```sh
-$ git clone https://github.com/alexsobolenko/symfony-test.git your_project
+$ git clone https://github.com/alexsobolenko/symfony4-test.git your_project
 $ cd your_project
 $ composer install
 ```
