@@ -34,7 +34,33 @@
         </div>
         <div class="col-5">
           <button type="submit" class="btn btn-success">Save</button>
+          {% if mode != 'create' %}
+            <button class="btn btn-danger" data-toggle="modal" data-target="#modal{{ book.id }}">Delete</button>
+          {% endif %}
         </div>
       </div>
     </form>
+    {% if mode != 'create' %}
+      <div class="modal fade" id="modal{{ book.id }}" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Delete book</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="modal-body">
+              Delete book "{{ book.name }} [{{ book.author }}]"?
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+              <form method="POST" action="/delete/book/{{ book.id }}">
+                <button type="submit" class="btn btn-primary">OK</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
 {% endblock %}

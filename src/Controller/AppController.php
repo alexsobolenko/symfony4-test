@@ -45,6 +45,10 @@ class AppController extends AbstractController {
   }
 
   public function authorDelete($id) {
+    $entityManager = $this->getDoctrine()->getManager();
+    $author = $this->getDoctrine()->getRepository(Author::class)->find($id);
+    $entityManager->remove($author);
+    $entityManager->flush();
     return $this->redirect("/list/authors");
   }
 
@@ -64,15 +68,11 @@ class AppController extends AbstractController {
     return $this->redirect("/list/authors");
   }
 
-  public function authorBookDelete($bookId, $authorId) {
-    return $this->redirect("/author/$authorId");
-  }
-
   public function booksList() {
     $altBooks = [];
     $books = $this->getDoctrine()->getRepository(Book::class)->findAll();
     foreach ($books as $book) {
-      $author = $this->getDoctrine()->getRepository(Author::class)->find($book->getId());
+      $author = $this->getDoctrine()->getRepository(Author::class)->find($book->getAuthor());
       $altBooks[] = [
         "id" => $book->getId(),
         "name" => $book->getName(),
@@ -89,7 +89,7 @@ class AppController extends AbstractController {
 
   public function bookEdit($id) {
     $book = $this->getDoctrine()->getRepository(Book::class)->find($id);
-    $author = $this->getDoctrine()->getRepository(Author::class)->find($book->getId());
+    $author = $this->getDoctrine()->getRepository(Author::class)->find($book->getAuthor());
     $authors = $this->getDoctrine()->getRepository(Author::class)->findAll();
     $options = [
       "title" => "Edit book \"".$book->getName()."\" (".$author->getName().")",
@@ -112,6 +112,10 @@ class AppController extends AbstractController {
   }
 
   public function bookDelete($id) {
+    $entityManager = $this->getDoctrine()->getManager();
+    $book = $this->getDoctrine()->getRepository(Book::class)->find($id);
+    $entityManager->remove($book);
+    $entityManager->flush();
     return $this->redirect("/list/books");
   }
 

@@ -22,10 +22,6 @@ author_delete:
    path: /delete/author/{id}
    controller: App\Controller\AppController::authorDelete
 
-author_book_delete:
-   path: /delete/author-book/{bookId}/{authorId}
-   controller: App\Controller\AppController::authorBookDelete
-
 books_list:
    path: /list/books
    controller: App\Controller\AppController::booksList
