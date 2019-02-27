@@ -48,6 +48,22 @@ class AppController extends AbstractController {
     return $this->redirect("/list/authors");
   }
 
+  public function authorSave() {
+    $entityManager = $this->getDoctrine()->getManager();
+    if ($_POST['action'] === 'insert') {
+      $author = new Author();
+      $author->setBooks(0);
+    }
+    else if ($_POST['action'] === 'update') {
+      $author = $this->getDoctrine()->getRepository(Author::class)->find($_POST['id']);
+    }
+    else return Response('oops!');
+    $author->setName($_POST['name']);
+    $entityManager->persist($author);
+    $entityManager->flush();
+    return $this->redirect("/list/authors");
+  }
+
   public function authorBookDelete($bookId, $authorId) {
     return $this->redirect("/author/$authorId");
   }
@@ -96,6 +112,29 @@ class AppController extends AbstractController {
   }
 
   public function bookDelete($id) {
+    return $this->redirect("/list/books");
+  }
+
+  public function bookSave() {
+    $entityManager = $this->getDoctrine()->getManager();
+    if ($_POST['action'] === 'insert') {
+      $book = new Book();
+    }
+    else if ($_POST['action'] === 'update') {
+      $book = $this->getDoctrine()->getRepository(Book::class)->find($_POST['id']);
+    }
+    else return Response('oops!');
+    $book->setName($_POST['name']);
+    $book->setPrice($_POST['price']);
+    $book->setAuthor($_POST['author']);
+    $entityManager->flush();
+    $entityManager->persist($book);
+    if ($_POST['action'] === 'insert') {
+      $author = $this->getDoctrine()->getRepository(Author::class)->find($_POST['author']);
+      $author->setBooks($author->getBooks() + 1);
+      $entityManager->persist($author);
+      $entityManager->flush();
+    }
     return $this->redirect("/list/books");
   }
 
