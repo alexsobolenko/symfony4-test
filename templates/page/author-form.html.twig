@@ -5,6 +5,16 @@
 {% endblock %}
 
 {% block body %}
-    <h1 class="my-3">{{ title }}</h1>
-    {{ form(author) }}
+    <div class="card">
+        <header class="card-header">
+            <p class="card-header-title">
+                <span class="is-size-3" style="margin: 0 50px;">{{ title }}</span>
+            </p>
+        </header>
+        <div class="card-content">
+            <div class="content is-paddingless is-marginless">
+                {{ form(author) }}
+            </div>
+        </div>
+    </div>
 {% endblock %}

@@ -1,31 +1,53 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}
-  {{ title }}
+    {{ title }}
 {% endblock %}
 
 {% block body %}
-  <h1 class="my-3">Authors</h1>
-  <a href="{{ path('page_author_create') }}" class="btn btn-primary my-3">Add new author</a><br>
-  <table class="table table-bordered table-stripped text-center my-3">
-    <thead class="thead-dark">
-      <tr>
-        <th style="width: 64%;">Name</th>
-        <th style="width: 18%;">Count of books</th>
-        <th style="width: 18%;"></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for author in authors %}
-        <tr>
-          <td>{{ author.name }}</td>
-          <td>{{ author.books|length }}</td>
-          <td>
-            <a href="{{ path('page_author_edit', {'id': author.id}) }}" class="btn btn-success">Edit</a>
-            <a href="{{ path('page_author_delete', {'id': author.id}) }}" class="btn btn-danger">Delete</a>
-          </td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+    <div class="card">
+        <header class="card-header">
+            <p class="card-header-title">
+                <span class="is-size-3" style="margin: 0 50px;">Authors</span>
+                <a href="{{ path('page_author_create') }}" class="button is-success">
+                    Add new author
+                </a>
+            </p>
+        </header>
+        <div class="card-content">
+            <div class="content is-paddingless is-marginless">
+                <table class="table is-marginless">
+                    <thead>
+                        <tr>
+                            <th style="width: 64%; padding-left: 20px;">Name</th>
+                            <th style="width: 18%; text-align: center;">Count of books</th>
+                            <th style="width: 18%;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for author in authors %}
+                            <tr>
+                                <td style="padding-left: 20px; vertical-align: middle;">{{ author.name }}</td>
+                                <td style="text-align: center; vertical-align: middle;">{{ author.books|length }}</td>
+                                <td style="text-align: center; vertical-align: middle;">
+                                    <a
+                                        href="{{ path('page_author_edit', {'id': author.id}) }}"
+                                        class="button is-success is-small"
+                                    >
+                                        Edit
+                                    </a>
+                                    <a
+                                        href="{{ path('page_author_delete', {'id': author.id}) }}"
+                                        class="button is-danger is-small"
+                                    >
+                                        Delete
+                                    </a>
+                                </td>
+                            </tr>
+                      {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 {% endblock %}

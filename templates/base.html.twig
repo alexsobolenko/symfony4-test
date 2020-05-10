@@ -2,35 +2,31 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <link rel="stylesheet" href="//stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css" />
     <title>{% block title %}{% endblock %}</title>
     {% block stylesheets %}{% endblock %}
 </head>
 <body>
+    <nav class="navbar is-primary" role="navigation" aria-label="main navigation" style="margin-bottom: 15px;">
+        <div class="container">
+            <div class="navbar-start">
+                <a class="navbar-item" href="{{ path('page_authors_list') }}">Authors</a>
+                <a class="navbar-item" href="{{ path('page_books_list') }}">Books</a>
+            </div>
+        </div>
+    </nav>
     <div class="container">
-        <ul class="nav">
-            <li class="nav-item">
-                <a class="nav-link" href="{{ path('page_authors_list') }}">Authors</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ path('page_books_list') }}">Books</a>
-            </li>
-        </ul>
         {% block errors %}
             {% for error in errors %}
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    {{ error }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
+                <article class="message is-danger is-medium">
+                    <div class="message-body">
+                        {{ error }}
+                    </div>
+                </article>
             {% endfor %}
         {% endblock %}
         {% block body %}{% endblock %}
     </div>
-    <script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-    <script src="//stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     {% block javascripts %}{% endblock %}
 </body>
 </html>
