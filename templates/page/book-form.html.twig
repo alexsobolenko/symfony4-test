@@ -1,0 +1,10 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ title }}
+{% endblock %}
+
+{% block body %}
+    <h1 class="my-3">{{ title }}</h1>
+    {{ form(book) }}
+{% endblock %}

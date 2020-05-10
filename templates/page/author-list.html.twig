@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+  {{ title }}
+{% endblock %}
+
+{% block body %}
+  <h1 class="my-3">Authors</h1>
+  <a href="{{ path('page_author_create') }}" class="btn btn-primary my-3">Add new author</a><br>
+  <table class="table table-bordered table-stripped text-center my-3">
+    <thead class="thead-dark">
+      <tr>
+        <th style="width: 64%;">Name</th>
+        <th style="width: 18%;">Count of books</th>
+        <th style="width: 18%;"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for author in authors %}
+        <tr>
+          <td>{{ author.name }}</td>
+          <td>{{ author.books|length }}</td>
+          <td>
+            <a href="{{ path('page_author_edit', {'id': author.id}) }}" class="btn btn-success">Edit</a>
+            <a href="{{ path('page_author_delete', {'id': author.id}) }}" class="btn btn-danger">Delete</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

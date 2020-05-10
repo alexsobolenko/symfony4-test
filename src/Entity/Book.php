@@ -1,74 +1,96 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
 /**
+ * Class Book
+ * @package App\Entity
  * @ORM\Entity(repositoryClass="App\Repository\BookRepository")
  */
 class Book
 {
     /**
+     * @var string
      * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue(strategy="UUID")
+     * @ORM\Column(name="id", type="string")
      */
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @var string
+     * @ORM\Column(name="name", type="string", length=255)
      */
     private $name;
 
     /**
-     * @ORM\Column(type="integer")
+     * @var float
+     * @ORM\Column(name="price", type="float")
+     */
+    private $price;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Author", inversedBy="books")
      */
     private $author;
 
     /**
-     * @ORM\Column(type="float")
+     * @return string|null
      */
-    private $price;
-
-    public function getId(): ?int
+    public function getId(): ?string
     {
         return $this->id;
     }
 
+    /**
+     * @return string|null
+     */
     public function getName(): ?string
     {
         return $this->name;
     }
 
-    public function setName(string $name): self
+    /**
+     * @param string $name
+     */
+    public function setName(string $name): void
     {
         $this->name = $name;
-
-        return $this;
     }
 
-    public function getAuthor(): ?int
-    {
-        return $this->author;
-    }
-
-    public function setAuthor(int $author): self
-    {
-        $this->author = $author;
-
-        return $this;
-    }
-
+    /**
+     * @return float|null
+     */
     public function getPrice(): ?float
     {
         return $this->price;
     }
 
-    public function setPrice(float $price): self
+    /**
+     * @param float $price
+     */
+    public function setPrice(float $price): void
     {
         $this->price = $price;
+    }
 
-        return $this;
+    /**
+     * @return Author|null
+     */
+    public function getAuthor(): ?Author
+    {
+        return $this->author;
+    }
+
+    /**
+     * @param Author|null $author
+     */
+    public function setAuthor(?Author $author): void
+    {
+        $this->author = $author;
     }
 }
