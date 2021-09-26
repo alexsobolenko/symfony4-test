@@ -1,74 +1,110 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Ramsey\Uuid\Uuid;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\BookRepository")
+ * @ORM\Table(name="`books`")
  */
 class Book
 {
     /**
+     * @var string
+     * @ORM\Column(name="`id`", type="guid")
      * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
      */
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @var string
+     * @ORM\Column(name="`name`", type="string", length=255)
      */
     private $name;
 
     /**
-     * @ORM\Column(type="integer")
+     * @var Author
+     * @ORM\ManyToOne(targetEntity="Author", inversedBy="books")
+     * @ORM\JoinColumn(name="`author_id`", referencedColumnName="id", nullable=false, onDelete="CASCADE")
      */
     private $author;
 
     /**
-     * @ORM\Column(type="float")
+     * @var float
+     * @ORM\Column(name="`price`", type="float")
      */
     private $price;
 
-    public function getId(): ?int
+    /**
+     * @param Author $author
+     * @param string $name
+     * @param float $price
+     */
+    public function __construct(Author $author, string $name, float $price)
+    {
+        $this->id = Uuid::uuid4()->toString();
+        $this->author = $author;
+        $this->name = $name;
+        $this->price = $price;
+    }
+
+    /**
+     * @return string
+     */
+    public function getId(): string
     {
         return $this->id;
     }
 
-    public function getName(): ?string
+    /**
+     * @return string
+     */
+    public function getName(): string
     {
         return $this->name;
     }
 
-    public function setName(string $name): self
+    /**
+     * @param string $name
+     */
+    public function setName(string $name): void
     {
         $this->name = $name;
-
-        return $this;
     }
 
-    public function getAuthor(): ?int
+    /**
+     * @return Author
+     */
+    public function getAuthor(): Author
     {
         return $this->author;
     }
 
-    public function setAuthor(int $author): self
+    /**
+     * @param Author $author
+     */
+    public function setAuthor(Author $author): void
     {
         $this->author = $author;
-
-        return $this;
     }
 
-    public function getPrice(): ?float
+    /**
+     * @return float
+     */
+    public function getPrice(): float
     {
         return $this->price;
     }
 
-    public function setPrice(float $price): self
+    /**
+     * @param float $price
+     */
+    public function setPrice(float $price): void
     {
         $this->price = $price;
-
-        return $this;
     }
 }

@@ -1,26 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>{% block title %}{% endblock %}</title>
-  <link rel="stylesheet" href="//stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-  {% block stylesheets %}{% endblock %}
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="//stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    {% block stylesheets %}{% endblock %}
 </head>
 <body>
-  <div class="container">
-    <ul class="nav">
-      <li class="nav-item">
-        <a class="nav-link" href="/list/authors">Authors</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/list/books">Books</a>
-      </li>
-    </ul>
-    {% block body %}{% endblock %}
-  </div>
-  <script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-  <script src="//stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-  {% block javascripts %}{% endblock %}
+    <div class="container">
+        <ul class="nav">
+            <li class="nav-item">
+                <a class="nav-link" href="/list/authors">Authors</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/list/books">Books</a>
+            </li>
+        </ul>
+        <div class="row">
+            <div class="col-8">
+                <h1 class="my-3">{{ title }}</h1>
+                {% for label, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ label }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+                {% block body %}{% endblock %}
+            </div>
+        </div>
+    </div>
+    <script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="//stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    {% block javascripts %}{% endblock %}
 </body>
 </html>

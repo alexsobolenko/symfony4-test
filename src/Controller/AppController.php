@@ -1,156 +1,223 @@
 <?php
 
-// src/Controller/AppController.php
-namespace App\Controller;
+declare(strict_types=1);
 
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+namespace App\Controller;
 
 use App\Entity\Author;
 use App\Entity\Book;
+use App\Model\AuthorModel;
+use App\Model\BookModel;
+use App\Form\AuthorType;
+use App\Form\BookType;
+use App\Repository\AuthorRepository;
+use App\Repository\BookRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\Routing\Annotation\Route;
 
-class AppController extends AbstractController {
-
-  public function index() {
-    return $this->redirect("/list/authors");
-  }
-
-  public function authorsList() {
-    $authors = $this->getDoctrine()->getRepository(Author::class)->findAll();
-    $options = [
-      "title" => "Authors",
-      "authors" => $authors
-    ];
-    return $this->render("author-list.html.twig", $options);
-  }
-
-  public function authorEdit($id) {
-    $author = $this->getDoctrine()->getRepository(Author::class)->find($id);
-    $options = [
-      "title" => "Edit ".$author->getName(),
-      "mode" => "edit",
-      "author" => $author
-    ];
-    return $this->render("author-form.html.twig", $options);
-  }
-
-  public function authorCreate() {
-    $options = [
-      "title" => "Add new author",
-      "mode" => "create",
-      "author" => [ "id" => "", "name" => "", "books" => "" ]
-    ];
-    return $this->render("author-form.html.twig", $options);
-  }
-
-  public function authorDelete($id) {
-    $entityManager = $this->getDoctrine()->getManager();
-    $author = $this->getDoctrine()->getRepository(Author::class)->find($id);
-    $entityManager->remove($author);
-    $entityManager->flush();
-    $books = $this->getDoctrine()->getRepository(Book::class)->findBy(['author' => $id]);
-    foreach ($books as $book) {
-      $entityManager->remove($book);
-      $entityManager->flush();
+class AppController extends AbstractController
+{
+    /**
+     * @Route(path="", methods={"GET"}, name="app_index")
+     * @return Response
+     */
+    public function indexAction(): Response
+    {
+        return $this->redirectToRoute('app_authors_list');
     }
-    return $this->redirect("/list/authors");
-  }
 
-  public function authorSave() {
-    $entityManager = $this->getDoctrine()->getManager();
-    if ($_POST['action'] === 'insert') {
-      $author = new Author();
-      $author->setBooks(0);
-    }
-    else if ($_POST['action'] === 'update') {
-      $author = $this->getDoctrine()->getRepository(Author::class)->find($_POST['id']);
-    }
-    else return Response('oops!');
-    $author->setName($_POST['name']);
-    $entityManager->persist($author);
-    $entityManager->flush();
-    return $this->redirect("/list/authors");
-  }
+    /**
+     * @Route(path="/list/authors", methods={"GET"}, name="app_authors_list")
+     * @return Response
+     */
+    public function authorsListAction(): Response
+    {
+        $authors = $this->getAuthorRepository()->findAll();
 
-  public function booksList() {
-    $altBooks = [];
-    $books = $this->getDoctrine()->getRepository(Book::class)->findAll();
-    foreach ($books as $book) {
-      $author = $this->getDoctrine()->getRepository(Author::class)->find($book->getAuthor());
-      $altBooks[] = [
-        "id" => $book->getId(),
-        "name" => $book->getName(),
-        "author" => $author->getName(),
-        "price" => $book->getPrice()
-      ];
+        return $this->render('author/list.html.twig', [
+            'title' => 'Authors',
+            'authors' => $authors,
+        ]);
     }
-    $options = [
-      "title" => "booksList",
-      "books" => $altBooks
-    ];
-    return $this->render("book-list.html.twig", $options);
-  }
 
-  public function bookEdit($id) {
-    $book = $this->getDoctrine()->getRepository(Book::class)->find($id);
-    $author = $this->getDoctrine()->getRepository(Author::class)->find($book->getAuthor());
-    $authors = $this->getDoctrine()->getRepository(Author::class)->findAll();
-    $options = [
-      "title" => "Edit book \"".$book->getName()."\" (".$author->getName().")",
-      "mode" => "edit",
-      "book" => [ "id" => $book->getId(), "name" => $book->getName(), "author" => $author->getName(), "price" => $book->getPrice() ],
-      "authors" => $authors
-    ];
-    return $this->render("book-form.html.twig", $options);
-  }
+    /**
+     * @Route(path="/create/author", methods={"GET","POST"}, name="app_author_create")
+     * @Route(path="/edit/author/{id}", methods={"GET","POST"}, name="app_author_edit")
+     * @param Request $request
+     * @param string|null $id
+     * @return Response
+     */
+    public function authorDetailsAction(Request $request, ?string $id = null): Response
+    {
+        if ($id === null) {
+            $model = new AuthorModel();
+            $title = 'Add new author';
+        } else {
+            $repo = $this->getAuthorRepository();
+            $author = $repo->find($id);
+            $model = AuthorModel::map($author);
+            $title = 'Edit ' . $author->getName();
+        }
 
-  public function bookCreate() {
-    $authors = $this->getDoctrine()->getRepository(Author::class)->findAll();
-    $options = [
-      "title" => "Add new book",
-      "mode" => "create",
-      "book" => [ "id" => "", "name" => "", "author" => "", "price" => "" ],
-      "authors" => $authors
-    ];
-    return $this->render("book-form.html.twig", $options);
-  }
+        $form = $this->createForm(AuthorType::class, $model);
+        $form->handleRequest($request);
 
-  public function bookDelete($id) {
-    $entityManager = $this->getDoctrine()->getManager();
-    $book = $this->getDoctrine()->getRepository(Book::class)->find($id);
-    $author = $this->getDoctrine()->getRepository(Author::class)->find($book->getAuthor());
-    if ($author->getBooks() > 0) {
-      $author->setBooks($author->getBooks() - 1);
-      $entityManager->persist($author);
-      $entityManager->flush();
+        if ($form->isSubmitted() && $form->isValid()) {
+            $model = $form->getData();
+            $em = $this->getEntityManager();
+            if ($id === null) {
+                $author = new Author($model->name);
+                $em->persist($author);
+            } else {
+                $author->setName($model->name);
+            }
+
+            $em->flush();
+            $this->addFlash('success', 'Author created');
+
+            return $this->redirectToRoute('app_authors_list');
+        }
+
+        return $this->render('author/form.html.twig', [
+            'title' => $title,
+            'form' => $form->createView(),
+        ]);
     }
-    $entityManager->remove($book);
-    $entityManager->flush();
-    return $this->redirect("/list/books");
-  }
 
-  public function bookSave() {
-    $entityManager = $this->getDoctrine()->getManager();
-    if ($_POST['action'] === 'insert') {
-      $book = new Book();
-    }
-    else if ($_POST['action'] === 'update') {
-      $book = $this->getDoctrine()->getRepository(Book::class)->find($_POST['id']);
-    }
-    else return Response('oops!');
-    $book->setName($_POST['name']);
-    $book->setPrice($_POST['price']);
-    $book->setAuthor($_POST['author']);
-    $entityManager->flush();
-    $entityManager->persist($book);
-    if ($_POST['action'] === 'insert') {
-      $author = $this->getDoctrine()->getRepository(Author::class)->find($_POST['author']);
-      $author->setBooks($author->getBooks() + 1);
-      $entityManager->persist($author);
-      $entityManager->flush();
-    }
-    return $this->redirect("/list/books");
-  }
+    /**
+     * @Route(path="/delete/author/{id}", methods={"GET","POST"}, name="app_author_delete")
+     * @param string $id
+     * @return Response
+     */
+    public function authorDeleteAction(string $id): Response
+    {
+        $em = $this->getEntityManager();
+        $author = $this->getAuthorRepository()->find($id);
+        $em->remove($author);
+        $em->flush();
+        $this->addFlash('success', 'Author deleted');
 
+        return $this->redirectToRoute('app_authors_list');
+    }
+
+    /**
+     * @Route(path="/list/books", methods={"GET"}, name="app_books_list")
+     * @return Response
+     */
+    public function booksListAction(): Response
+    {
+        $books = $this->getBookRepository()->findAll();
+
+        return $this->render('book/list.html.twig', [
+            'title' => 'Books',
+            'books' => $books,
+        ]);
+    }
+
+    /**
+     * @Route(path="/create/book", methods={"GET","POST"}, name="app_book_create")
+     * @Route(path="/edit/book/{id}", methods={"GET","POST"}, name="app_book_edit")
+     * @param Request $request
+     * @param string|null $id
+     * @return Response
+     */
+    public function bookEditAction(Request $request, ?string $id = null): Response
+    {
+        if ($id === null) {
+            if (!$this->getAuthorRepository()->hasAuthors()) {
+                $this->addFlash('danger', 'Has no authors yet. Create one new first');
+            }
+
+            $model = new BookModel();
+            $title = 'Add new book';
+        } else {
+            $repo = $this->getBookRepository();
+            $book = $repo->find($id);
+            $model = BookModel::map($book);
+            $title = 'Edit ' . $book->getName() . '(' . $book->getAuthor()->getName() . ')';
+        }
+
+        $form = $this->createForm(BookType::class, $model, [
+            'em' => $this->getEntityManager(),
+        ]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $model = $form->getData();
+            $em = $this->getEntityManager();
+            $author = $this->getAuthorRepository()->find($model->author);
+
+            if ($id === null) {
+                $book = new Book($author, $model->name, $model->price);
+                $em->persist($book);
+            } else {
+                $book->setAuthor($author);
+                $book->setName($model->name);
+                $book->setPrice($model->price);
+            }
+
+            $em->flush();
+            $this->addFlash('success', 'Book created');
+
+            return $this->redirectToRoute('app_books_list');
+        }
+
+        return $this->render('book/form.html.twig', [
+            'title' => $title,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @Route(path="/delete/book/{id}", methods={"GET","POST"}, name="app_book_delete")
+     * @param string $id
+     * @return Response
+     */
+    public function bookDeleteAction(string $id): Response
+    {
+        $em = $this->getEntityManager();
+        $book = $this->getBookRepository()->find($id);
+        $em->remove($book);
+        $em->flush();
+        $this->addFlash('success', 'Book deleted');
+
+        return $this->redirectToRoute('app_books_list');
+    }
+
+    /**
+     * @return EntityManagerInterface
+     */
+    private function getEntityManager(): EntityManagerInterface
+    {
+        /** @var EntityManagerInterface $em */
+        $em = $this->getDoctrine()->getManager();
+
+        return $em;
+    }
+
+    /**
+     * @return AuthorRepository
+     */
+    private function getAuthorRepository(): AuthorRepository
+    {
+        /** @var AuthorRepository $repo */
+        $repo = $this->getDoctrine()->getRepository(Author::class);
+
+        return $repo;
+    }
+
+    /**
+     * @return BookRepository
+     */
+    private function getBookRepository(): BookRepository
+    {
+        /** @var BookRepository $repo */
+        $repo = $this->getDoctrine()->getRepository(Book::class);
+
+        return $repo;
+    }
 }
