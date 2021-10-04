@@ -1,5 +1,5 @@
 {% block form_row %}
-    {% spaceless %}
+    {% apply spaceless %}
         <div class="form-group">
             <div class="row">
                 <div class="col-12 col-lg-4 text-left text-lg-right" style="line-height: 36px">
@@ -16,7 +16,7 @@
                 </div>
             </div>
         </div>
-    {% endspaceless %}
+    {% endapply %}
 {% endblock form_row %}
 
 {%- block form_errors -%}
@@ -24,10 +24,10 @@
     {%- if errors|length > 0 -%}
     <div class="py-2 mb-2 bg-danger text-white text-center" style="border-radius: 4px;">
         <ul class="pl-3 pr-3 m-0 list-unstyled">
-            {%- for error in errors if not break  -%}
+            {% for error in errors %}
                 <li>{{ error.message }}</li>
                 {% set break = true %}
-            {%- endfor -%}
+            {% endfor %}
         </ul>
     </div>
     {%- endif -%}
@@ -35,7 +35,12 @@
 
 {%- block form_widget_simple -%}
     {%- set type = type|default('text') -%}
-    <input type="{{ type }}" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %} class="form-control form-control-md"/>
+    <input
+        type="{{ type }}"
+        {{ block('widget_attributes') }}
+        {% if value is not empty %}value="{{ value }}" {% endif %}
+        class="form-control form-control-md"
+    >
 {%- endblock form_widget_simple -%}
 
 {%- block form_widget_compound -%}
@@ -46,7 +51,11 @@
 {%- endblock form_widget_compound -%}
 
 {%- block button_attributes -%}
-    id="{{ id }}" name="{{ full_name }}"{% if disabled %} disabled="disabled"{% endif -%} class="btn btn-primary" style="min-width: 140px;"
+    id="{{ id }}"
+    name="{{ full_name }}"
+    {% if disabled %} disabled="disabled"{% endif -%}
+    class="btn btn-primary"
+    style="min-width: 140px;"
     {{ block('attributes') }}
 {%- endblock button_attributes -%}
 
