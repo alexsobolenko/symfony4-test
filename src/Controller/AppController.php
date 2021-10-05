@@ -36,7 +36,7 @@ class AppController extends AbstractController
      */
     public function authorsListAction(): Response
     {
-        $authors = $this->getAuthorRepository()->findAll();
+        $authors = $this->getAuthorRepository()->findBy([], ['name' => 'ASC']);
 
         return $this->render('author/list.html.twig', [
             'title' => 'Authors',
@@ -110,7 +110,7 @@ class AppController extends AbstractController
      */
     public function booksListAction(): Response
     {
-        $books = $this->getBookRepository()->findAll();
+        $books = $this->getBookRepository()->findBy([], ['price' => 'ASC']);
 
         return $this->render('book/list.html.twig', [
             'title' => 'Books',
@@ -138,7 +138,7 @@ class AppController extends AbstractController
             $repo = $this->getBookRepository();
             $book = $repo->find($id);
             $model = BookModel::map($book);
-            $title = 'Edit ' . $book->getName() . '(' . $book->getAuthor()->getName() . ')';
+            $title = 'Edit ' . $book->getName() . ' (' . $book->getAuthor()->getName() . ')';
         }
 
         $form = $this->createForm(BookType::class, $model, [
