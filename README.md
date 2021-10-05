@@ -11,14 +11,14 @@ $ cd your_project
 3. Create database and run server:
 * First run:
 ```sh
-make first-run
+$ make first-run
 ```
 * Another:
 ```sh
-make run
+$ make run
 ```
 4. For check code run:
 ```sh
-make check-syntax
+$ make check-syntax
 ```
 
