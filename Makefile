@@ -17,5 +17,6 @@ phpunit:
 	php7.4 bin/console doctrine:database:drop --env=test --force
 
 check-syntax:
-# 	make phpunit
+	make phpunit
 	php7.4 vendor/bin/phplint
+	php7.4 vendor/bin/phpstan analyse

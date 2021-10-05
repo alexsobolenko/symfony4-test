@@ -26,3 +26,4 @@
 .vscode
 
 phplint.cache
+/phpstan
