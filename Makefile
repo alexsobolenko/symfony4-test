@@ -20,3 +20,4 @@ check-syntax:
 	make phpunit
 	php7.4 vendor/bin/phplint
 	php7.4 vendor/bin/phpstan analyse
+	php7.4 vendor/bin/phpcs
