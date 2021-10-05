@@ -1,4 +1,7 @@
 # SYMFONY 4 test task
+
+---
+
 1. Install project:
 ```sh
 $ git clone https://github.com/alexsobolenko/symfony4-test.git your_project
@@ -13,5 +16,9 @@ make first-run
 * Another:
 ```sh
 make run
+```
+4. For check code run:
+```sh
+make check-syntax
 ```
 
