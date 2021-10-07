@@ -1,3 +1,8 @@
+docker-prepare:
+	php composer.phar install
+	php bin/console doctrine:database:create
+	php bin/console doctrine:migrations:migrate
+
 run:
 	php7.4 bin/console cache:clear
 	php7.4 -S localhost:8000 -t public
