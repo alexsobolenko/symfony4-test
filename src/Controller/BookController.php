@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Entity\Book;
+use App\Manager\BookManager;
 use App\Model\BookModel;
 use App\Form\BookType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -14,15 +15,21 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * @Route(path="/books")
  */
-class BookController extends BaseController
+class BookController extends AbstractController
 {
     /**
      * @Route(path="/list", methods={"GET"}, name="app_books_list")
+     * @param BookManager $manager
      * @return Response
      */
-    public function booksListAction(): Response
+    public function booksListAction(BookManager $manager): Response
     {
-        $books = $this->getBookRepository()->findBy([], ['price' => 'ASC']);
+        try {
+            $books = $manager->findAll();
+        } catch (\Throwable $e) {
+            $books = [];
+            $this->addFlash('danger', $e->getMessage());
+        }
 
         return $this->render('book/list.html.twig', [
             'title' => 'Books',
@@ -34,48 +41,44 @@ class BookController extends BaseController
      * @Route(path="/create", methods={"GET","POST"}, name="app_book_create")
      * @Route(path="/edit/{id}", methods={"GET","POST"}, name="app_book_edit")
      * @param Request $request
+     * @param BookManager $manager
      * @param string|null $id
      * @return Response
      */
-    public function bookEditAction(Request $request, ?string $id = null): Response
+    public function bookEditAction(Request $request, BookManager $manager, ?string $id = null): Response
     {
-        if ($id === null) {
-            if (!$this->getAuthorRepository()->hasAuthors()) {
-                $this->addFlash('danger', 'Has no authors yet. Create one new first');
-            }
-
-            $model = new BookModel();
-            $title = 'Add new book';
-        } else {
-            $repo = $this->getBookRepository();
-            $book = $repo->find($id);
-            $model = BookModel::map($book);
-            $title = 'Edit ' . $book->getName() . ' (' . $book->getAuthor()->getName() . ')';
-        }
-
-        $form = $this->createForm(BookType::class, $model, [
-            'em' => $this->getEntityManager(),
-        ]);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $model = $form->getData();
-            $em = $this->getEntityManager();
-            $author = $this->getAuthorRepository()->find($model->author);
-
+        try {
             if ($id === null) {
-                $book = new Book($author, $model->name, $model->price);
-                $em->persist($book);
+                $model = new BookModel();
+                $title = 'Add new book';
             } else {
-                $book->setAuthor($author);
-                $book->setName($model->name);
-                $book->setPrice($model->price);
+                $book = $manager->get($id);
+                $model = BookModel::map($book);
+                $title = 'Edit ' . $book->getName() . ' (' . $book->getAuthor()->getName() . ')';
             }
 
-            $em->flush();
-            $this->addFlash('success', 'Book created');
+            $form = $this->createForm(BookType::class, $model, [
+                'em' => $this->getDoctrine()->getManager(),
+            ]);
+            $form->handleRequest($request);
 
-            return $this->redirectToRoute('app_books_list');
+            if ($form->isSubmitted() && $form->isValid()) {
+                $model = $form->getData();
+
+                if ($id === null) {
+                    $book = $manager->create($model->author, $model->name, $model->price);
+                    $bookTitle = $book->getName() . ' (' . $book->getAuthor()->getName() . ')';
+                    $this->addFlash('success', 'Book "' . $bookTitle . '" created');
+                } else {
+                    $book = $manager->edit($id, $model->author, $model->name, $model->price);
+                    $bookTitle = $book->getName() . ' (' . $book->getAuthor()->getName() . ')';
+                    $this->addFlash('success', 'Book "' . $bookTitle . '" saved');
+                }
+
+                return $this->redirectToRoute('app_books_list');
+            }
+        } catch (\Throwable $e) {
+            $this->addFlash('danger', $e->getMessage());
         }
 
         return $this->render('book/form.html.twig', [
@@ -87,15 +90,16 @@ class BookController extends BaseController
     /**
      * @Route(path="/delete/{id}", methods={"GET","POST"}, name="app_book_delete")
      * @param string $id
+     * @param BookManager $manager
      * @return Response
      */
-    public function bookDeleteAction(string $id): Response
+    public function bookDeleteAction(BookManager $manager, string $id): Response
     {
-        $em = $this->getEntityManager();
-        $book = $this->getBookRepository()->find($id);
-        $em->remove($book);
-        $em->flush();
-        $this->addFlash('success', 'Book deleted');
+        try {
+            $manager->delete($id);
+        } catch (\Throwable $e) {
+            $this->addFlash('danger', $e->getMessage());
+        }
 
         return $this->redirectToRoute('app_books_list');
     }

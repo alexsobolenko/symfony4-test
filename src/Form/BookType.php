@@ -6,6 +6,7 @@ namespace App\Form;
 
 use App\Entity\Author;
 use App\Model\BookModel;
+use App\Repository\AuthorRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -13,6 +14,8 @@ use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class BookType extends AbstractType
@@ -25,9 +28,16 @@ class BookType extends AbstractType
     {
         /** @var EntityManagerInterface $em */
         $em = $options['em'];
+
+        /** @var AuthorRepository $repo */
         $repo = $em->getRepository(Author::class);
+
+        if (!$repo->hasAuthors()) {
+            throw new BadRequestException('Has no authors yet. Create one new first');
+        }
+
         $authors = [];
-        foreach ($repo->findAll() as $author) {
+        foreach ($repo->findBy([], ['name' => 'ASC']) as $author) {
             $authors[$author->getName()] = $author->getId();
         }
 
