@@ -42,40 +42,13 @@
                     >
                         <i class="fas fa-pen"></i>
                     </a>
-                    <a
-                        href="#"
-                        class="btn btn-outline-danger"
+                    <button
+                        class="btn btn-outline-danger btn-modal-delete"
                         style="min-width: 50px; line-height: 36px;"
-                        data-toggle="modal"
-                        data-target="#modal{{ author.id }}"
+                        data-href="{{ path('app_author_delete', {'id': author.id}) }}"
                     >
                         <i class="fas fa-trash"></i>
-                    </a>
-                </div>
-                <div class="modal fade" id="modal{{ author.id }}" role="dialog">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Delete author</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                            <div class="modal-body">
-                                Delete "{{ author.name }}"?
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                                    Cancel
-                                </button>
-                                <form method="POST" action="{{ path('app_author_delete', {'id': author.id}) }}">
-                                    <button type="submit" class="btn btn-primary">
-                                        OK
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+                    </button>
                 </div>
             </li>
         </ul>

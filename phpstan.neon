@@ -13,6 +13,6 @@ parameters:
     symfony:
         container_xml_path: %rootDir%/../../../var/cache/dev/srcApp_KernelDevDebugContainer.xml
     excludes_analyse:
-        - "%rootDir%/../../../migrations/*"
+        - "%rootDir%/../../../src/Migrations/*"
     bootstrapFiles:
         - vendor/autoload.php
