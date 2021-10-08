@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Exception\AppException;
 use App\Manager\AuthorManager;
 use App\Model\AuthorModel;
 use App\Form\AuthorType;
 use App\Model\PaginatedDataModel;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * @Route(path="/authors")
  */
-class AuthorController extends AbstractController
+class AuthorController extends BaseController
 {
     /**
      * @Route(path="/list", methods={"GET"}, name="app_authors_list")
@@ -30,13 +30,16 @@ class AuthorController extends AbstractController
             $filters = $request->query->all();
             $filters['limit'] = (int) $this->getParameter('authors_on_page');
             $authors = $manager->findBy($filters);
-        } catch (\Throwable $e) {
+        } catch (AppException $e) {
             $authors = new PaginatedDataModel();
-            $this->addFlash('danger', $e->getMessage());
+            $this->addFlash(
+                'danger',
+                $this->translator->trans($e->getMessage())
+            );
         }
 
         return $this->render('author/list.html.twig', [
-            'title' => 'Authors',
+            'title' => $this->translator->trans('title.authors.list'),
             'authors' => $authors,
             'request' => $request,
         ]);
@@ -55,11 +58,13 @@ class AuthorController extends AbstractController
         try {
             if ($id === null) {
                 $model = new AuthorModel();
-                $title = 'Add new author';
+                $title = $this->translator->trans('title.authors.create');
             } else {
                 $author = $manager->get($id);
                 $model = AuthorModel::map($author);
-                $title = 'Edit ' . $author->getName();
+                $title = $this->translator->trans('title.authors.edit', [
+                    '%name%' => $author->getName(),
+                ]);
             }
 
             $form = $this->createForm(AuthorType::class, $model);
@@ -77,8 +82,13 @@ class AuthorController extends AbstractController
 
                 return $this->redirectToRoute('app_authors_list');
             }
-        } catch (\Throwable $e) {
-            $this->addFlash('danger', $e->getMessage());
+        } catch (AppException $e) {
+            $this->addFlash(
+                'danger',
+                $this->translator->trans($e->getMessage())
+            );
+
+            return $this->redirectToRoute('app_authors_list');
         }
 
         return $this->render('author/form.html.twig', [
@@ -98,8 +108,11 @@ class AuthorController extends AbstractController
         try {
             $manager->delete($id);
             $this->addFlash('success', 'Author deleted');
-        } catch (\Throwable $e) {
-            $this->addFlash('danger', $e->getMessage());
+        } catch (AppException $e) {
+            $this->addFlash(
+                'danger',
+                $this->translator->trans($e->getMessage())
+            );
         }
 
         return $this->redirectToRoute('app_authors_list');

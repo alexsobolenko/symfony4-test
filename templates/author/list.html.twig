@@ -3,7 +3,7 @@
 {% import 'helpers.html.twig' as helpers %}
 
 {% block title %}
-  {{ title }}
+    {{ title }}
 {% endblock %}
 
 {% block body %}
@@ -11,15 +11,26 @@
         <form class="card-body">
             <div class="row g-3 align-items-center">
                 <div class="col-3 text-right">
-                    <label for="filter_name" class="col-form-label">Author name</label>
+                    <label for="filter_name" class="col-form-label">
+                        {{ 'filter.author_name'|trans }}
+                    </label>
                 </div>
                 <div class="col-5">
-                    <input type="text" id="filter_name" class="form-control" name="name" value="{{ request.query.get('name') }}">
+                    <input
+                        id="filter_name"
+                        class="form-control"
+                        name="name"
+                        value="{{ request.query.get('name') }}"
+                    >
                 </div>
                 <div class="col-4 px-3">
                     <div class="btn-group w-100">
-                        <button type="submit" class="btn btn-success">Filter</button>
-                        <a href="{{ absolute_url(path('app_authors_list')) }}" class="btn btn-danger">Clear</a>
+                        <button type="submit" class="btn btn-success">
+                            {{ 'filter.apply'|trans }}
+                        </button>
+                        <a href="{{ absolute_url(path('app_authors_list')) }}" class="btn btn-danger">
+                            {{ 'filter.clear'|trans }}
+                        </a>
                     </div>
                 </div>
             </div>
@@ -27,7 +38,7 @@
     </div>
     <div class="my-3">
         <a href="{{ path('app_author_create') }}">
-            Add new author
+            {{ 'page.author.list.new'|trans }}
         </a>
     </div>
     {% for author in authors.items %}
@@ -55,7 +66,7 @@
     {% else %}
         <ul class="list-group mb-1">
             <li class="list-group-item">
-                Authors not found
+                {{ 'page.author.list.not_found'|trans }}
             </li>
         </ul>
     {% endfor %}

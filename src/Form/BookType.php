@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Form;
 
 use App\Entity\Author;
+use App\Exception\AppException;
 use App\Model\BookModel;
 use App\Repository\AuthorRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -17,9 +18,23 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class BookType extends AbstractType
 {
+    /**
+     * @var TranslatorInterface
+     */
+    protected TranslatorInterface $translator;
+
+    /**
+     * @param TranslatorInterface $translator
+     */
+    public function __construct(TranslatorInterface $translator)
+    {
+        $this->translator = $translator;
+    }
+
     /**
      * @param FormBuilderInterface $builder
      * @param array $options
@@ -33,7 +48,7 @@ class BookType extends AbstractType
         $repo = $em->getRepository(Author::class);
 
         if (!$repo->hasAuthors()) {
-            throw new BadRequestException('Has no authors yet. Create one new first');
+            throw new AppException('error.has_no_authors');
         }
 
         $authors = [];
@@ -44,19 +59,19 @@ class BookType extends AbstractType
         $builder
             ->add('author', ChoiceType::class, [
                 'required' => true,
-                'label' => 'Author',
+                'label' => $this->translator->trans('page.book.details.author'),
                 'choices' => $authors,
             ])
             ->add('name', TextType::class, [
                 'required' => true,
-                'label' => 'Book name',
+                'label' => $this->translator->trans('page.book.details.name'),
             ])
             ->add('price', NumberType::class, [
                 'required' => true,
-                'label' => 'Price',
+                'label' => $this->translator->trans('page.book.details.price'),
             ])
             ->add('submit', SubmitType::class, [
-                'label' => 'Save',
+                'label' => $this->translator->trans('main.save'),
             ])
         ;
     }

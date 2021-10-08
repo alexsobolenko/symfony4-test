@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Manager;
 
 use App\Entity\Book;
+use App\Exception\AppException;
 use App\Model\PaginatedDataModel;
 use App\Repository\BookRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpFoundation\Response;
 
 class BookManager
 {
@@ -46,13 +46,13 @@ class BookManager
     /**
      * @param string $id
      * @return Book
-     * @throws NotFoundHttpException
+     * @throws AppException
      */
     public function get(string $id): Book
     {
         $book = $this->bookRepo->find($id);
         if (!$book instanceof Book) {
-            throw new NotFoundHttpException('Book not found by id');
+            throw new AppException('error.book_not_found', Response::HTTP_NOT_FOUND);
         }
 
         return $book;
@@ -61,6 +61,7 @@ class BookManager
     /**
      * @param array $filters
      * @return PaginatedDataModel
+     * @throws AppException
      */
     public function findBy(array $filters): PaginatedDataModel
     {
@@ -73,7 +74,7 @@ class BookManager
 
             return new PaginatedDataModel($total, (int) $limit, (int) $page, $items);
         } catch (\Throwable $e) {
-            throw new BadRequestException($e->getMessage());
+            throw new AppException($e->getMessage());
         }
     }
 
@@ -82,15 +83,18 @@ class BookManager
      * @param string $name
      * @param float $price
      * @return Book
-     * @throws NotFoundHttpException
+     * @throws AppException
      */
     public function create(string $authorId, string $name, float $price): Book
     {
         $author = $this->authorManager->get($authorId);
-
-        $book = new Book($author, $name, $price);
-        $this->entityManager->persist($book);
-        $this->entityManager->flush();
+        try {
+            $book = new Book($author, $name, $price);
+            $this->entityManager->persist($book);
+            $this->entityManager->flush();
+        } catch (\Throwable $e) {
+            throw new AppException($e->getMessage(), $e->getCode());
+        }
 
         return $book;
     }
@@ -101,29 +105,36 @@ class BookManager
      * @param string $name
      * @param float $price
      * @return Book
-     * @throws NotFoundHttpException
+     * @throws AppException
      */
     public function edit(string $id, string $authorId, string $name, float $price): Book
     {
         $author = $this->authorManager->get($authorId);
-
         $book = $this->get($id);
-        $book->setAuthor($author);
-        $book->setName($name);
-        $book->setPrice($price);
-        $this->entityManager->flush();
+        try {
+            $book->setAuthor($author);
+            $book->setName($name);
+            $book->setPrice($price);
+            $this->entityManager->flush();
+        } catch (\Throwable $e) {
+            throw new AppException($e->getMessage(), $e->getCode());
+        }
 
         return $book;
     }
 
     /**
      * @param string $id
-     * @throws NotFoundHttpException
+     * @throws AppException
      */
     public function delete(string $id): void
     {
         $book = $this->get($id);
-        $this->entityManager->remove($book);
-        $this->entityManager->flush();
+        try {
+            $this->entityManager->remove($book);
+            $this->entityManager->flush();
+        } catch (\Throwable $e) {
+            throw new AppException($e->getMessage(), $e->getCode());
+        }
     }
 }

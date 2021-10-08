@@ -1,0 +1,50 @@
+main:
+    ok: 'OK'
+    cancel: 'Cancel'
+    save: 'Save'
+
+navbar:
+    authors: 'Authors'
+    books: 'Books'
+
+title:
+    authors:
+        list: 'Authors'
+        create: 'Add new author'
+        edit: 'Edit "%name%"'
+    books:
+        list: 'Books'
+        create: 'Add new book'
+        edit: 'Edit "%name%" (%author%)'
+
+modal:
+    delete:
+        title: 'Delete item'
+        body: 'Confirm deletion?'
+
+filter:
+    author_name: 'Author name'
+    book_name: 'Book name'
+    apply: 'Filter'
+    clear: 'Clear'
+
+page:
+    author:
+        list:
+            new: 'Add new author'
+            not_found: 'Authors not found'
+        details:
+            name: 'Author name'
+    book:
+        list:
+            new: 'Add new book'
+            not_found: 'Books not found'
+        details:
+            name: 'Book name'
+            author: 'Author'
+            price: 'Price'
+
+error:
+    author_not_found: 'Author not found by id'
+    has_no_authors: 'Has no authors yet. Create one new first'
+    book_not_found: 'Book not found by id'

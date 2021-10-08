@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Exception\AppException;
 use App\Manager\BookManager;
 use App\Model\BookModel;
 use App\Form\BookType;
 use App\Model\PaginatedDataModel;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * @Route(path="/books")
  */
-class BookController extends AbstractController
+class BookController extends BaseController
 {
     /**
      * @Route(path="/list", methods={"GET"}, name="app_books_list")
@@ -30,13 +30,16 @@ class BookController extends AbstractController
             $filters = $request->query->all();
             $filters['limit'] = (int) $this->getParameter('books_on_page');
             $books = $manager->findBy($filters);
-        } catch (\Throwable $e) {
+        } catch (AppException $e) {
             $books = new PaginatedDataModel();
-            $this->addFlash('danger', $e->getMessage());
+            $this->addFlash(
+                'danger',
+                $this->translator->trans($e->getMessage())
+            );
         }
 
         return $this->render('book/list.html.twig', [
-            'title' => 'Books',
+            'title' => $this->translator->trans('title.books.list'),
             'books' => $books,
             'request' => $request,
         ]);
@@ -55,11 +58,14 @@ class BookController extends AbstractController
         try {
             if ($id === null) {
                 $model = new BookModel();
-                $title = 'Add new book';
+                $title = $this->translator->trans('title.books.create');
             } else {
                 $book = $manager->get($id);
                 $model = BookModel::map($book);
-                $title = 'Edit ' . $book->getName() . ' (' . $book->getAuthor()->getName() . ')';
+                $title = $this->translator->trans('title.books.edit', [
+                    '%name%' => $book->getName(),
+                    '%author%' => $book->getAuthor()->getName(),
+                ]);
             }
 
             $form = $this->createForm(BookType::class, $model, [
@@ -82,8 +88,13 @@ class BookController extends AbstractController
 
                 return $this->redirectToRoute('app_books_list');
             }
-        } catch (\Throwable $e) {
-            $this->addFlash('danger', $e->getMessage());
+        } catch (AppException $e) {
+            $this->addFlash(
+                'danger',
+                $this->translator->trans($e->getMessage())
+            );
+
+            return $this->redirectToRoute('app_books_list');
         }
 
         return $this->render('book/form.html.twig', [
@@ -102,8 +113,11 @@ class BookController extends AbstractController
     {
         try {
             $manager->delete($id);
-        } catch (\Throwable $e) {
-            $this->addFlash('danger', $e->getMessage());
+        } catch (AppException $e) {
+            $this->addFlash(
+                'danger',
+                $this->translator->trans($e->getMessage())
+            );
         }
 
         return $this->redirectToRoute('app_books_list');

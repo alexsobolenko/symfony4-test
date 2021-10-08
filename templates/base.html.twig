@@ -1,11 +1,21 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app.request.locale }}">
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css">
     {% block stylesheets %}{% endblock %}
+    <style>
+        .flag {
+            height: 38px;
+            width: 38px;
+            filter: grayscale(100%);
+        }
+        .flag.active, .flag:hover {
+            filter: grayscale(0);
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
@@ -25,10 +35,40 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ path('app_authors_list') }}">Authors</a>
+                    <a class="nav-link" href="{{ path('app_authors_list') }}">
+                        {{ 'navbar.authors'|trans }}
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ path('app_books_list') }}">Books</a>
+                    <a class="nav-link" href="{{ path('app_books_list') }}">
+                        {{ 'navbar.books'|trans }}
+                    </a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_change_locale', {'locale': 'ru'}) }}">
+                        <img
+                            class="flag {{ app.request.locale == 'ru' ? 'active' : '' }}"
+                            src="/locale/ru.png"
+                            alt="RU"
+                            data-toggle="tooltip"
+                            data-placement="bottom"
+                            title="Русский"
+                        >
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_change_locale', {'locale': 'en'}) }}">
+                        <img
+                            class="flag {{ app.request.locale == 'en' ? 'active' : '' }}"
+                            src="/locale/en.png"
+                            alt="EN"
+                            data-toggle="tooltip"
+                            data-placement="bottom"
+                            title="English"
+                        >
+                    </a>
                 </li>
             </ul>
         </div>
@@ -52,20 +92,22 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Delete item</h5>
+                    <h5 class="modal-title">
+                        {{ 'modal.delete.title'|trans }}
+                    </h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
                 <div class="modal-body">
-                    Confirm deletion?
+                    {{ 'modal.delete.body'|trans }}
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                        Cancel
+                        {{ 'main.cancel'|trans }}
                     </button>
                     <a href="#" class="btn btn-primary">
-                        OK
+                        {{ 'main.ok'|trans }}
                     </a>
                 </div>
             </div>
@@ -76,6 +118,7 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <script>
         $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip('enable');
             var $modal = $('#modalDelete');
             $('.btn-modal-delete').on('click', function (e) {
                 var $btn = $(e.target);

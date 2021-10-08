@@ -1,0 +1,50 @@
+main:
+    ok: 'OK'
+    cancel: 'Отмена'
+    save: 'Сохранить'
+
+navbar:
+    authors: 'Авторы'
+    books: 'Книги'
+
+title:
+    authors:
+        list: 'Авторы'
+        create: 'Создание автора'
+        edit: 'Редактирование "%name%"'
+    books:
+        list: 'Книги'
+        create: 'Создание книги'
+        edit: 'Редактирование "%name%" (%author%)'
+
+modal:
+    delete:
+        title: 'Удаление элемента'
+        body: 'Подтвердите удаление'
+
+filter:
+    author_name: 'Имя автора'
+    book_name: 'Название книги'
+    apply: 'Фильтр'
+    clear: 'Очистить'
+
+page:
+    author:
+        list:
+            new: 'Добавить автора'
+            not_found: 'Авторы не найдены'
+        details:
+            name: 'Имя'
+    book:
+        list:
+            new: 'Добавить книгу'
+            not_found: 'Книги не найдены'
+        details:
+            name: 'Название'
+            author: 'Автор'
+            price: 'Цена'
+
+error:
+    author_not_found: 'Автор не найден по id'
+    has_no_authors: 'Авторы отсутствуют. Добавьте автора перед добавлением книги'
+    book_not_found: 'Книга не найдена по id'

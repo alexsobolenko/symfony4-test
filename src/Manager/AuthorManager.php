@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Manager;
 
 use App\Entity\Author;
+use App\Exception\AppException;
 use App\Model\PaginatedDataModel;
 use App\Repository\AuthorRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuthorManager
 {
@@ -36,13 +36,13 @@ class AuthorManager
     /**
      * @param string $id
      * @return Author
-     * @throws NotFoundHttpException
+     * @throws AppException
      */
     public function get(string $id): Author
     {
         $author = $this->authorRepo->find($id);
         if (!$author instanceof Author) {
-            throw new NotFoundHttpException('Author not found by id');
+            throw new AppException('error.author_not_found', Response::HTTP_NOT_FOUND);
         }
 
         return $author;
@@ -51,6 +51,7 @@ class AuthorManager
     /**
      * @param array $filters
      * @return PaginatedDataModel
+     * @throws AppException
      */
     public function findBy(array $filters): PaginatedDataModel
     {
@@ -63,19 +64,24 @@ class AuthorManager
 
             return new PaginatedDataModel($total, (int) $limit, (int) $page, $items);
         } catch (\Throwable $e) {
-            throw new BadRequestException($e->getMessage());
+            throw new AppException($e->getMessage());
         }
     }
 
     /**
      * @param string $name
      * @return Author
+     * @throws AppException
      */
     public function create(string $name): Author
     {
-        $author = new Author($name);
-        $this->entityManager->persist($author);
-        $this->entityManager->flush();
+        try {
+            $author = new Author($name);
+            $this->entityManager->persist($author);
+            $this->entityManager->flush();
+        } catch (\Throwable $e) {
+            throw new AppException($e->getMessage(), $e->getCode());
+        }
 
         return $author;
     }
@@ -84,25 +90,34 @@ class AuthorManager
      * @param string $id
      * @param string $name
      * @return Author
-     * @throws NotFoundHttpException
+     * @throws AppException
      */
     public function edit(string $id, string $name): Author
     {
         $author = $this->get($id);
-        $author->setName($name);
-        $this->entityManager->flush();
+        try {
+            $author->setName($name);
+            $this->entityManager->flush();
+        } catch (\Throwable $e) {
+            throw new AppException($e->getMessage(), $e->getCode());
+        }
 
         return $author;
     }
 
     /**
      * @param string $id
-     * @throws NotFoundHttpException
+     * @throws AppException
      */
     public function delete(string $id): void
     {
         $author = $this->get($id);
-        $this->entityManager->remove($author);
-        $this->entityManager->flush();
+        try {
+            $this->entityManager->remove($author);
+            $this->entityManager->flush();
+        } catch (\Throwable $e) {
+            throw new AppException($e->getMessage(), $e->getCode());
+        }
+
     }
 }
