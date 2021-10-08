@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Manager\BookManager;
 use App\Model\BookModel;
 use App\Form\BookType;
+use App\Model\PaginatedDataModel;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,21 +20,25 @@ class BookController extends AbstractController
 {
     /**
      * @Route(path="/list", methods={"GET"}, name="app_books_list")
+     * @param Request $request
      * @param BookManager $manager
      * @return Response
      */
-    public function booksListAction(BookManager $manager): Response
+    public function booksListAction(Request $request, BookManager $manager): Response
     {
         try {
-            $books = $manager->findAll();
+            $filters = $request->query->all();
+            $filters['limit'] = (int) $this->getParameter('books_on_page');
+            $books = $manager->findBy($filters);
         } catch (\Throwable $e) {
-            $books = [];
+            $books = new PaginatedDataModel();
             $this->addFlash('danger', $e->getMessage());
         }
 
         return $this->render('book/list.html.twig', [
             'title' => 'Books',
             'books' => $books,
+            'request' => $request,
         ]);
     }
 

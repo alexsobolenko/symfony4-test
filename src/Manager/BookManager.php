@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Manager;
 
 use App\Entity\Book;
+use App\Model\PaginatedDataModel;
 use App\Repository\BookRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class BookManager
@@ -57,11 +59,22 @@ class BookManager
     }
 
     /**
-     * @return Book[]
+     * @param array $filters
+     * @return PaginatedDataModel
      */
-    public function findAll(): array
+    public function findBy(array $filters): PaginatedDataModel
     {
-        return $this->bookRepo->findBy([], ['price' => 'ASC']);
+        try {
+            $page = $filters['page'] ?? 1;
+            $limit = $filters['limit'] ?? 10;
+
+            $total = $this->bookRepo->countByFilter($filters);
+            $items = $this->bookRepo->findByFilter($filters, (int) $page, (int) $limit);
+
+            return new PaginatedDataModel($total, (int) $limit, (int) $page, $items);
+        } catch (\Throwable $e) {
+            throw new BadRequestException($e->getMessage());
+        }
     }
 
     /**

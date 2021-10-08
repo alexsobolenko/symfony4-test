@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Manager;
 
 use App\Entity\Author;
+use App\Model\PaginatedDataModel;
 use App\Repository\AuthorRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class AuthorManager
@@ -47,11 +49,22 @@ class AuthorManager
     }
 
     /**
-     * @return Author[]
+     * @param array $filters
+     * @return PaginatedDataModel
      */
-    public function findAll(): array
+    public function findBy(array $filters): PaginatedDataModel
     {
-        return $this->authorRepo->findBy([], ['name' => 'ASC']);
+        try {
+            $page = $filters['page'] ?? 1;
+            $limit = $filters['limit'] ?? 10;
+
+            $total = $this->authorRepo->countByFilter($filters);
+            $items = $this->authorRepo->findByFilter($filters, (int) $page, (int) $limit);
+
+            return new PaginatedDataModel($total, (int) $limit, (int) $page, $items);
+        } catch (\Throwable $e) {
+            throw new BadRequestException($e->getMessage());
+        }
     }
 
     /**

@@ -5,6 +5,8 @@
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
     locale: 'en'
+    authors_on_page: '%env(AUTHORS_ON_PAGE)%'
+    books_on_page: '%env(BOOKS_ON_PAGE)%'
 
 services:
     # default configuration for services in *this* file

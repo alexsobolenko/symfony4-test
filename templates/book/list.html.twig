@@ -1,33 +1,77 @@
 {% extends 'base.html.twig' %}
 
+{% import 'helpers.html.twig' as helpers %}
+
 {% block title %}
     {{ title }}
 {% endblock %}
 
 {% block body %}
+    <div class="card my-3">
+        <form class="card-body">
+            <div class="row g-3 align-items-center mb-2">
+                <div class="col-3 text-right">
+                    <label for="filter_author" class="col-form-label">Author name</label>
+                </div>
+                <div class="col-5">
+                    <input type="text" id="filter_author" class="form-control" name="author" value="{{ request.query.get('author') }}">
+                </div>
+            </div>
+            <div class="row g-3 align-items-center">
+                <div class="col-3 text-right">
+                    <label for="filter_name" class="col-form-label">Book name</label>
+                </div>
+                <div class="col-5">
+                    <input type="text" id="filter_name" class="form-control" name="name" value="{{ request.query.get('name') }}">
+                </div>
+                <div class="col-4 px-3">
+                    <div class="btn-group w-100">
+                        <button type="submit" class="btn btn-success">Filter</button>
+                        <a href="{{ absolute_url(path('app_books_list')) }}" class="btn btn-danger">Clear</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
     <div class="my-3">
         <a href="{{ path('app_book_create') }}">
             Add new book
         </a>
     </div>
-    <ul class="list-group">
-        {% for book in books %}
+    {% for book in books.items %}
+        <ul class="list-group mb-1">
             <li class="list-group-item d-flex justify-content-between align-items-start">
                 <div>
                     {{ book.name }}
-                    <span class="text-muted">({{ book.author.name }})</span>
-                    <span class="badge bg-primary text-white ml-2" style="font-size: 15px;">${{ book.price }}</span>
+                    <a
+                        href="{{ absolute_url(path('app_books_list', {'author': book.author.name})) }}"
+                        class="text-muted"
+                    >
+                        ({{ book.author.name }})
+                    </a>
+                    <span class="badge bg-info text-white ml-2" style="font-size: 15px;">${{ book.price }}</span>
                 </div>
-                <div>
-                    <a href="{{ path('app_book_edit', {'id': book.id}) }}" class="mr-2">
-                        Edit
+                <div class="btn-group" style="height: 49px; margin: -12px -20px -12px 0;">
+                    <a
+                        href="{{ path('app_book_edit', {'id': book.id}) }}"
+                        class="btn btn-outline-success"
+                        style="min-width: 50px; line-height: 36px;"
+                    >
+                        <i class="fas fa-pen"></i>
                     </a>
-                    <a href="#" data-toggle="modal" data-target="#modal{{ book.id }}">
-                        Delete
+                    <a
+                        href="#"
+                        class="btn btn-outline-danger"
+                        style="min-width: 50px; line-height: 36px;"
+                        data-toggle="modal"
+                        data-target="#modal{{ book.id }}"
+                    >
+                        <i class="fas fa-trash"></i>
                     </a>
-                    <div class="modal fade" id="modal{{ book.id }}" role="dialog">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
+                </div>
+                <div class="modal fade" id="modal{{ book.id }}" role="dialog">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title">Delete book</h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -49,10 +93,13 @@
                     </div>
                 </div>
             </li>
-        {% else %}
+        </ul>
+    {% else %}
+        <ul class="list-group mb-1">
             <li class="list-group-item">
                 Books not found
             </li>
-        {% endfor %}
-    </ul>
+        </ul>
+    {% endfor %}
+    {{ helpers.navigation(books.page, books.pageItems, books.prev, books.next, ['name', 'author'])}}
 {% endblock %}

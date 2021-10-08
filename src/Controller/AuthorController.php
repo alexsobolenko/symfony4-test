@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Manager\AuthorManager;
 use App\Model\AuthorModel;
 use App\Form\AuthorType;
+use App\Model\PaginatedDataModel;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,21 +20,25 @@ class AuthorController extends AbstractController
 {
     /**
      * @Route(path="/list", methods={"GET"}, name="app_authors_list")
+     * @param Request $request
      * @param AuthorManager $manager
      * @return Response
      */
-    public function authorsListAction(AuthorManager $manager): Response
+    public function authorsListAction(Request $request, AuthorManager $manager): Response
     {
         try {
-            $authors = $manager->findAll();
+            $filters = $request->query->all();
+            $filters['limit'] = (int) $this->getParameter('authors_on_page');
+            $authors = $manager->findBy($filters);
         } catch (\Throwable $e) {
-            $authors = [];
+            $authors = new PaginatedDataModel();
             $this->addFlash('danger', $e->getMessage());
         }
 
         return $this->render('author/list.html.twig', [
             'title' => 'Authors',
             'authors' => $authors,
+            'request' => $request,
         ]);
     }
 
