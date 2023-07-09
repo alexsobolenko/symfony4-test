@@ -4,40 +4,27 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Repository\BookRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Ramsey\Uuid\Uuid;
+use Symfony\Component\Uid\Uuid;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\BookRepository")
- * @ORM\Table(name="`books`")
- */
+#[ORM\Entity(repositoryClass: BookRepository::class), ORM\Table(name: 'books')]
 class Book
 {
-    /**
-     * @var string
-     * @ORM\Column(name="`id`", type="guid")
-     * @ORM\Id()
-     */
-    private $id;
+    #[ORM\Id, ORM\Column(name: 'id', type: 'guid')]
+    private string $id;
 
-    /**
-     * @var string
-     * @ORM\Column(name="`name`", type="string", length=255)
-     */
-    private $name;
+    #[ORM\Column(name: 'name', type: 'string', length: 255)]
+    private string $name;
 
-    /**
-     * @var Author
-     * @ORM\ManyToOne(targetEntity="Author", inversedBy="books")
-     * @ORM\JoinColumn(name="`author_id`", referencedColumnName="id", nullable=false, onDelete="CASCADE")
-     */
-    private $author;
+    #[
+        ORM\ManyToOne(targetEntity: Author::class, inversedBy: 'books'),
+        ORM\JoinColumn(name: 'author_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')
+    ]
+    private Author $author;
 
-    /**
-     * @var float
-     * @ORM\Column(name="`price`", type="float")
-     */
-    private $price;
+    #[ORM\Column(name: 'price', type: 'float')]
+    private float $price;
 
     /**
      * @param Author $author
@@ -46,7 +33,7 @@ class Book
      */
     public function __construct(Author $author, string $name, float $price)
     {
-        $this->id = Uuid::uuid4()->toString();
+        $this->id = Uuid::v7()->toRfc4122();
         $this->author = $author;
         $this->name = $name;
         $this->price = $price;
@@ -106,5 +93,13 @@ class Book
     public function setPrice(float $price): void
     {
         $this->price = $price;
+    }
+
+    /**
+     * @return string
+     */
+    public function getNameWithAuthor(): string
+    {
+        return "{$this->getName()} ({$this->getAuthor()->getName()})";
     }
 }

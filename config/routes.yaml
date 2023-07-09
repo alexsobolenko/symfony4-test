@@ -1,3 +1,5 @@
-# index:
-#    path: /
-#    controller: App\Controller\AppController::index
+controllers:
+    resource:
+        path: ../src/Controller/
+        namespace: App\Controller
+    type: attribute

@@ -4,32 +4,26 @@ declare(strict_types=1);
 
 namespace App\Twig;
 
+use App\Exception\AppException;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
-class AppExtension extends AbstractExtension
+final class AppExtension extends AbstractExtension
 {
     /**
-     * @var RequestStack
-     */
-    private RequestStack $requestStack;
-
-    /**
-     * @var UrlGeneratorInterface
-     */
-    private UrlGeneratorInterface $router;
-
-    /**
+     * @param TranslatorInterface $translator
      * @param RequestStack $requestStack
      * @param UrlGeneratorInterface $router
      */
-    public function __construct(RequestStack $requestStack, UrlGeneratorInterface $router)
-    {
-        $this->requestStack = $requestStack;
-        $this->router = $router;
-    }
+    public function __construct(
+        private readonly TranslatorInterface $translator,
+        private readonly RequestStack $requestStack,
+        private readonly UrlGeneratorInterface $router,
+    ) {}
 
     /**
      * @return TwigFunction[]
@@ -46,10 +40,15 @@ class AppExtension extends AbstractExtension
      * @param mixed $paramValue
      * @param array $paramsFromRequest
      * @return string
+     * @throws AppException
      */
-    public function appendParamToRoute(string $paramName, $paramValue, array $paramsFromRequest = []): string
+    public function appendParamToRoute(string $paramName, mixed $paramValue, array $paramsFromRequest = []): string
     {
         $request = $this->requestStack->getCurrentRequest();
+        if (!$request instanceof Request) {
+            throw new AppException($this->translator->trans('error.request_not_found'));
+        }
+
         $params = [];
         foreach ($paramsFromRequest as $key) {
             $value = $request->get($key);

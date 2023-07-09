@@ -11,37 +11,18 @@ use App\Repository\BookRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
-class BookManager
+final class BookManager
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    private EntityManagerInterface $entityManager;
-
-    /**
-     * @var AuthorManager
-     */
-    private AuthorManager $authorManager;
-
-    /**
-     * @var BookRepository
-     */
-    private BookRepository $bookRepo;
-
     /**
      * @param EntityManagerInterface $entityManager
      * @param AuthorManager $authorManager
      * @param BookRepository $bookRepo
      */
     public function __construct(
-        EntityManagerInterface $entityManager,
-        AuthorManager $authorManager,
-        BookRepository $bookRepo
-    ) {
-        $this->entityManager = $entityManager;
-        $this->authorManager = $authorManager;
-        $this->bookRepo = $bookRepo;
-    }
+        private readonly EntityManagerInterface $entityManager,
+        private readonly AuthorManager $authorManager,
+        private readonly BookRepository $bookRepo
+    ) {}
 
     /**
      * @param string $id

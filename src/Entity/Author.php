@@ -4,42 +4,30 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Repository\AuthorRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Ramsey\Uuid\Uuid;
+use Symfony\Component\Uid\Uuid;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\AuthorRepository")
- * @ORM\Table(name="`authors`")
- */
+#[ORM\Entity(repositoryClass: AuthorRepository::class), ORM\Table(name: 'authors')]
 class Author
 {
-    /**
-     * @var string
-     * @ORM\Column(name="`id`", type="guid")
-     * @ORM\Id()
-     */
-    private $id;
+    #[ORM\Id, ORM\Column(name: 'id', type: 'guid')]
+    private string $id;
 
-    /**
-     * @var string
-     * @ORM\Column(name="`name`", type="string", length=255)
-     */
-    private $name;
+    #[ORM\Column(name: 'name', type: 'string', length: 255)]
+    private string $name;
 
-    /**
-     * @var Collection
-     * @ORM\OneToMany(targetEntity="Book", mappedBy="author")
-     */
-    private $books;
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: Book::class)]
+    private Collection $books;
 
     /**
      * @param string $name
      */
     public function __construct(string $name)
     {
-        $this->id = Uuid::uuid4()->toString();
+        $this->id = Uuid::v7()->toRfc4122();
         $this->name = $name;
         $this->books = new ArrayCollection();
     }

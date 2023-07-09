@@ -10,15 +10,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 abstract class BaseController extends AbstractController
 {
     /**
-     * @var TranslatorInterface
-     */
-    protected TranslatorInterface $translator;
-
-    /**
      * @param TranslatorInterface $translator
      */
-    public function __construct(TranslatorInterface $translator)
-    {
-        $this->translator = $translator;
-    }
+    public function __construct(
+        protected readonly TranslatorInterface $translator
+    ) {}
 }

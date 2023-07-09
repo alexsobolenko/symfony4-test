@@ -8,23 +8,15 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-class DefaultController extends BaseController
+final class DefaultController extends BaseController
 {
-    /**
-     * @Route(path="", methods={"GET"}, name="app_index")
-     * @return Response
-     */
+    #[Route(path: '', name: 'app_index', methods: ['GET'])]
     public function indexAction(): Response
     {
         return $this->redirectToRoute('app_authors_list');
     }
 
-    /**
-     * @Route(path="/locale/{locale}", methods={"GET"}, name="app_change_locale")
-     * @param Request $request
-     * @param string $locale
-     * @return Response
-     */
+    #[Route(path: '/locale/{locale}', name: 'app_change_locale', methods: ['GET'])]
     public function changeLocaleAction(Request $request, string $locale): Response
     {
         $request->getSession()->set('_locale', $locale);

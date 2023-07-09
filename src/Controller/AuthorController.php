@@ -13,17 +13,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @Route(path="/authors")
- */
+#[Route(path: '/authors')]
 class AuthorController extends BaseController
 {
-    /**
-     * @Route(path="/list", methods={"GET"}, name="app_authors_list")
-     * @param Request $request
-     * @param AuthorManager $manager
-     * @return Response
-     */
+    #[Route(path: '/list', name: 'app_authors_list', methods: ['GET'])]
     public function authorsListAction(Request $request, AuthorManager $manager): Response
     {
         try {
@@ -32,10 +25,7 @@ class AuthorController extends BaseController
             $authors = $manager->findBy($filters);
         } catch (AppException $e) {
             $authors = new PaginatedDataModel();
-            $this->addFlash(
-                'danger',
-                $this->translator->trans($e->getMessage())
-            );
+            $this->addFlash('danger', $this->translator->trans($e->getMessage()));
         }
 
         return $this->render('author/list.html.twig', [
@@ -45,14 +35,10 @@ class AuthorController extends BaseController
         ]);
     }
 
-    /**
-     * @Route(path="/create", methods={"GET","POST"}, name="app_author_create")
-     * @Route(path="/edit/{id}", methods={"GET","POST"}, name="app_author_edit")
-     * @param Request $request
-     * @param AuthorManager $manager
-     * @param string|null $id
-     * @return Response
-     */
+    #[
+        Route(path: '/create', name: 'app_author_create', methods: ['GET', 'POST']),
+        Route(path: '/edit/{id}', name: 'app_author_edit', methods: ['GET', 'POST'])
+    ]
     public function authorDetailsAction(Request $request, AuthorManager $manager, ?string $id = null): Response
     {
         try {
@@ -62,9 +48,7 @@ class AuthorController extends BaseController
             } else {
                 $author = $manager->get($id);
                 $model = AuthorModel::map($author);
-                $title = $this->translator->trans('title.authors.edit', [
-                    '%name%' => $author->getName(),
-                ]);
+                $title = $this->translator->trans('title.authors.edit', ['%name%' => $author->getName()]);
             }
 
             $form = $this->createForm(AuthorType::class, $model);
@@ -74,19 +58,16 @@ class AuthorController extends BaseController
                 $model = $form->getData();
                 if ($id === null) {
                     $author = $manager->create($model->name);
-                    $this->addFlash('success', 'Author "' . $author->getName() . '" created');
+                    $this->addFlash('success', "Author \"{$author->getName()}\" created");
                 } else {
                     $author = $manager->edit($id, $model->name);
-                    $this->addFlash('success', 'Author "' . $author->getName() . '" saved');
+                    $this->addFlash('success', "Author \"{$author->getName()}\" saved");
                 }
 
                 return $this->redirectToRoute('app_authors_list');
             }
         } catch (AppException $e) {
-            $this->addFlash(
-                'danger',
-                $this->translator->trans($e->getMessage())
-            );
+            $this->addFlash('danger', $this->translator->trans($e->getMessage()));
 
             return $this->redirectToRoute('app_authors_list');
         }
@@ -97,22 +78,14 @@ class AuthorController extends BaseController
         ]);
     }
 
-    /**
-     * @Route(path="/delete/{id}", methods={"GET","POST"}, name="app_author_delete")
-     * @param AuthorManager $manager
-     * @param string $id
-     * @return Response
-     */
+    #[Route(path: '/delete/{id}', name: 'app_author_delete', methods: ['GET', 'POST'])]
     public function authorDeleteAction(AuthorManager $manager, string $id): Response
     {
         try {
             $manager->delete($id);
             $this->addFlash('success', 'Author deleted');
         } catch (AppException $e) {
-            $this->addFlash(
-                'danger',
-                $this->translator->trans($e->getMessage())
-            );
+            $this->addFlash('danger', $this->translator->trans($e->getMessage()));
         }
 
         return $this->redirectToRoute('app_authors_list');
