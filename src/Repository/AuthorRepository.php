@@ -10,6 +10,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuthorRepository extends ServiceEntityRepository
 {
@@ -19,6 +20,76 @@ class AuthorRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Author::class);
+    }
+
+    /**
+     * @param string $id
+     * @return Author
+     * @throws AppException
+     */
+    public function get(string $id): Author
+    {
+        $author = $this->find($id);
+        if (!$author instanceof Author) {
+            throw new AppException('error.author_not_found', Response::HTTP_NOT_FOUND);
+        }
+
+        return $author;
+    }
+
+    /**
+     * @param string $name
+     * @return Author
+     * @throws AppException
+     */
+    public function create(string $name): Author
+    {
+        try {
+            $author = new Author($name);
+            $this->_em->persist($author);
+            $this->_em->flush();
+        } catch (\Throwable $e) {
+            throw new AppException($e->getMessage(), $e->getCode());
+        }
+
+        return $author;
+    }
+
+    /**
+     * @param string $id
+     * @param string $name
+     * @return Author
+     * @throws AppException
+     */
+    public function edit(string $id, string $name): Author
+    {
+        $author = $this->get($id);
+        try {
+            $author->setName($name);
+            $this->_em->flush();
+        } catch (\Throwable $e) {
+            throw new AppException($e->getMessage(), $e->getCode());
+        }
+
+        return $author;
+    }
+
+    /**
+     * @param string $id
+     * @return Author
+     * @throws AppException
+     */
+    public function delete(string $id): Author
+    {
+        $author = $this->get($id);
+        try {
+            $this->_em->remove($author);
+            $this->_em->flush();
+        } catch (\Throwable $e) {
+            throw new AppException($e->getMessage(), $e->getCode());
+        }
+
+        return $author;
     }
 
     /**
@@ -50,17 +121,17 @@ class AuthorRepository extends ServiceEntityRepository
 
     /**
      * @param array $filters
-     * @param int $page
-     * @param int $limit
      * @return array
      * @throws AppException
      */
-    public function findByFilter(array $filters, int $page, int $limit): array
+    public function findByFilter(array $filters): array
     {
-        $offset = ($page - 1) * $limit;
+        $page = $filters['page'] ?? 1;
+        $limit = $filters['limit'] ?? 1;
+
         $qb = $this->createQuery($filters);
         $qb->setMaxResults($limit);
-        $qb->setFirstResult($offset);
+        $qb->setFirstResult(($page - 1) * $limit);
 
         $qb->addOrderBy('a.name', 'ASC');
 

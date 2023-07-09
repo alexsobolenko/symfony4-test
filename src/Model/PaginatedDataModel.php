@@ -22,11 +22,6 @@ final class PaginatedDataModel
     public ?int $next;
 
     /**
-     * @var array
-     */
-    public array $pageItems;
-
-    /**
      * @param int $total
      * @param int $limit
      * @param int $page
@@ -38,7 +33,6 @@ final class PaginatedDataModel
         public int $page = 1,
         public array $items = []
     ) {
-        $this->pageItems = [1];
         $this->pages = 0;
         $this->prev = null;
         $this->next = null;
@@ -50,30 +44,40 @@ final class PaginatedDataModel
                 if ($this->page !== $this->pages) {
                     $this->next = $this->page + 1;
                 }
-
                 if ($this->page !== 1) {
                     $this->prev = $this->page - 1;
                 }
             } else {
                 $this->page = 1;
             }
+        }
+    }
 
-            if ($this->pages < 5) {
+    /**
+     * @param int $length
+     * @return int[]
+     */
+    public function pageItems(int $length = 5): array
+    {
+        $res = [1];
+        if ($this->total > 0) {
+            $this->pages = (int) ceil($this->total / $this->limit);
+            if ($this->pages <= $length) {
                 for ($i = 2; $i <= $this->pages; $i++) {
-                    $this->pageItems[] = $i;
+                    $res[] = $i;
                 }
             } else {
-                if ($this->page >= 5) {
-                    $this->pageItems[] = '...';
+                if ($this->page > $length) {
+                    $res[] = '...';
                 }
 
-                if ($this->page + 4 <= $this->pages && $this->page >= 5) {
+                if ($this->page + ($length - 1) <= $this->pages && $this->page >= $length) {
                     for ($i = $this->page - 2; $i <= $this->page + 2; $i++) {
-                        $this->pageItems[] = $i;
+                        $res[] = $i;
                     }
                 } else {
-                    if ($this->page > 5) {
-                        $start = $this->pages - 4;
+                    if ($this->page > $length) {
+                        $start = $this->pages - $length - 1;
                         $end = $this->pages;
                     } else {
                         $start = 2;
@@ -89,18 +93,20 @@ final class PaginatedDataModel
                     }
 
                     for ($i = $start; $i <= $end; $i++) {
-                        $this->pageItems[] = $i;
+                        $res[] = $i;
                     }
                 }
 
-                if ($this->page <= $this->pages - 4) {
-                    $this->pageItems[] = '...';
+                if ($this->page <= $this->pages - ($length - 1)) {
+                    $res[] = '...';
                 }
 
-                if (!in_array($this->pages, $this->pageItems, true)) {
-                    $this->pageItems[] = $this->pages;
+                if (!in_array($this->pages, $res, true)) {
+                    $res[] = $this->pages;
                 }
             }
         }
+
+        return $res;
     }
 }

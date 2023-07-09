@@ -8,19 +8,19 @@ use App\Repository\BookRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity(repositoryClass: BookRepository::class), ORM\Table(name: 'books')]
+#[ORM\Entity(repositoryClass: BookRepository::class)]
+#[ORM\Table(name: 'books')]
 class Book
 {
-    #[ORM\Id, ORM\Column(name: 'id', type: 'guid')]
+    #[ORM\Id]
+    #[ORM\Column(name: 'id', type: 'guid')]
     private string $id;
 
     #[ORM\Column(name: 'name', type: 'string', length: 255)]
     private string $name;
 
-    #[
-        ORM\ManyToOne(targetEntity: Author::class, inversedBy: 'books'),
-        ORM\JoinColumn(name: 'author_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')
-    ]
+    #[ORM\ManyToOne(targetEntity: Author::class, inversedBy: 'books')]
+    #[ORM\JoinColumn(name: 'author_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private Author $author;
 
     #[ORM\Column(name: 'price', type: 'float')]

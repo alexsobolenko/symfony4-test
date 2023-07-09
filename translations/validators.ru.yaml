@@ -1,0 +1,6 @@
+error.name_is_blank: 'Имя не заполнено'
+error.name_length_min: 'Минимальная длина имени: {{ limit }} символов'
+error.name_length_max: 'Максимальная длина имени: {{ limit }} символов'
+error.price_is_blank: 'Цена не заполнена'
+error.price_not_in_range: 'Цена должна быть между {{ min }} и {{ max }}'
+error.author_is_blank: 'Автор не выбран'

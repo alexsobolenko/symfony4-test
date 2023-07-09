@@ -1,0 +1,6 @@
+error.name_is_blank: 'Name should not be blank'
+error.name_length_min: 'Name must be at least {{ limit }} characters long'
+error.name_length_max: 'Name cannot be longer than {{ limit }} characters'
+error.price_is_blank: 'Price should not be blank'
+error.price_not_in_range: 'Price should be between {{ min }} and {{ max }}'
+error.author_is_blank: 'Author should not be blank'

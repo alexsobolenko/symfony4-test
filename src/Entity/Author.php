@@ -10,10 +10,12 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity(repositoryClass: AuthorRepository::class), ORM\Table(name: 'authors')]
+#[ORM\Entity(repositoryClass: AuthorRepository::class)]
+#[ORM\Table(name: 'authors')]
 class Author
 {
-    #[ORM\Id, ORM\Column(name: 'id', type: 'guid')]
+    #[ORM\Id]
+    #[ORM\Column(name: 'id', type: 'guid')]
     private string $id;
 
     #[ORM\Column(name: 'name', type: 'string', length: 255)]
