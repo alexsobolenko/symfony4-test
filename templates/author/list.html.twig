@@ -20,7 +20,7 @@
                         id="filter_name"
                         class="form-control"
                         name="name"
-                        value="{{ request.query.get('name') }}"
+                        value="{{ app.request.query.get('name') }}"
                     >
                 </div>
                 <div class="col-4 px-3">
@@ -70,5 +70,5 @@
             </li>
         </ul>
     {% endfor %}
-    {{ helpers.navigation(authors.page, authors.pageItems, authors.prev, authors.next, ['name'])}}
+    {{ helpers.navigation(authors, ['name'])}}
 {% endblock %}

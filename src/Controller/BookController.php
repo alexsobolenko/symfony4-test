@@ -5,58 +5,61 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Exception\AppException;
-use App\Manager\BookManager;
 use App\Model\BookModel;
 use App\Form\BookType;
 use App\Model\PaginatedDataModel;
+use App\Repository\BookRepository;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route(path: '/books')]
-class BookController extends BaseController
+class BookController extends AbstractController
 {
     #[Route(path: '/list', name: 'app_books_list', methods: ['GET'])]
-    public function booksListAction(Request $request, BookManager $manager): Response
+    public function list(Request $request, BookRepository $repository, TranslatorInterface $translator): Response
     {
-        try {
-            $filters = $request->query->all();
+        $filters = $request->query->all();
+        if (!array_key_exists('page', $filters)) {
+            $filters['page'] = 1;
+        }
+        if (!array_key_exists('limit', $filters)) {
             $filters['limit'] = (int) $this->getParameter('books_on_page');
-            $books = $manager->findBy($filters);
+        }
+
+        try {
+            $total = $repository->countByFilter($filters);
+            $items = $repository->findByFilter($filters);
         } catch (AppException $e) {
-            $books = new PaginatedDataModel();
-            $this->addFlash('danger', $this->translator->trans($e->getMessage()));
+            $total = 0;
+            $items = [];
+            $this->addFlash('danger', $translator->trans($e->getMessage()));
         }
 
         return $this->render('book/list.html.twig', [
-            'title' => $this->translator->trans('title.books.list'),
-            'books' => $books,
-            'request' => $request,
+            'title' => $translator->trans('title.books.list'),
+            'books' => new PaginatedDataModel($total, $filters['limit'], $filters['page'], $items),
         ]);
     }
 
-    /**
-     * @Route(path="/create", methods={"GET","POST"}, name="app_book_create")
-     * @Route(path="/edit/{id}", methods={"GET","POST"}, name="app_book_edit")
-     * @param Request $request
-     * @param BookManager $manager
-     * @param string|null $id
-     * @return Response
-     */
-    #[
-        Route(path: '/create', name: 'app_book_create', methods: ['GET', 'POST']),
-        Route(path: '/edit/{id}', name: 'app_book_edit', methods: ['GET', 'POST'])
-    ]
-    public function bookEditAction(Request $request, BookManager $manager, ?string $id = null): Response
-    {
+    #[Route(path: '/create', name: 'app_book_create', methods: ['GET', 'POST'])]
+    #[Route(path: '/edit/{id}', name: 'app_book_edit', methods: ['GET', 'POST'])]
+    public function details(
+        Request $request,
+        BookRepository $repository,
+        TranslatorInterface $translator,
+        ?string $id = null
+    ): Response {
         try {
             if ($id === null) {
                 $model = new BookModel();
-                $title = $this->translator->trans('title.books.create');
+                $title = $translator->trans('title.books.create');
             } else {
-                $book = $manager->get($id);
+                $book = $repository->get($id);
                 $model = BookModel::map($book);
-                $title = $this->translator->trans('title.books.edit', [
+                $title = $translator->trans('title.books.edit', [
                     '%name%' => $book->getName(),
                     '%author%' => $book->getAuthor()->getName(),
                 ]);
@@ -67,19 +70,17 @@ class BookController extends BaseController
 
             if ($form->isSubmitted() && $form->isValid()) {
                 $model = $form->getData();
-
-                if ($id === null) {
-                    $book = $manager->create($model->author, $model->name, $model->price);
-                    $this->addFlash('success', "Book \"{$book->getNameWithAuthor()}\" created");
-                } else {
-                    $book = $manager->edit($id, $model->author, $model->name, $model->price);
-                    $this->addFlash('success', "Book \"{$book->getNameWithAuthor()}\" saved");
-                }
+                $book = $id === null
+                    ? $repository->create($model->author, $model->name, $model->price)
+                    : $repository->edit($id, $model->author, $model->name, $model->price);
+                $this->addFlash('success', $translator->trans('message.book.saved', [
+                    '%name%' => $book->getNameWithAuthor(),
+                ]));
 
                 return $this->redirectToRoute('app_books_list');
             }
         } catch (AppException $e) {
-            $this->addFlash('danger', $this->translator->trans($e->getMessage()));
+            $this->addFlash('danger', $translator->trans($e->getMessage()));
 
             return $this->redirectToRoute('app_books_list');
         }
@@ -91,12 +92,15 @@ class BookController extends BaseController
     }
 
     #[Route(path: '/delete/{id}', name: 'app_book_delete', methods: ['GET', 'POST'])]
-    public function bookDeleteAction(BookManager $manager, string $id): Response
+    public function delete(BookRepository $repository, TranslatorInterface $translator, string $id): Response
     {
         try {
-            $manager->delete($id);
+            $book = $repository->delete($id);
+            $this->addFlash('success', $translator->trans('message.book.deleted', [
+                '%name%' => $book->getNameWithAuthor(),
+            ]));
         } catch (AppException $e) {
-            $this->addFlash('danger', $this->translator->trans($e->getMessage()));
+            $this->addFlash('danger', $translator->trans($e->getMessage()));
         }
 
         return $this->redirectToRoute('app_books_list');
