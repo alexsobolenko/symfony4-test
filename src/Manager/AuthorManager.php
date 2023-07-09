@@ -11,27 +11,16 @@ use App\Repository\AuthorRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
-class AuthorManager
+final class AuthorManager
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    private EntityManagerInterface $entityManager;
-
-    /**
-     * @var AuthorRepository
-     */
-    private AuthorRepository $authorRepo;
-
     /**
      * @param EntityManagerInterface $entityManager
      * @param AuthorRepository $authorRepo
      */
-    public function __construct(EntityManagerInterface $entityManager, AuthorRepository $authorRepo)
-    {
-        $this->entityManager = $entityManager;
-        $this->authorRepo = $authorRepo;
-    }
+    public function __construct(
+        private readonly EntityManagerInterface $entityManager,
+        private readonly AuthorRepository $authorRepo
+    ) {}
 
     /**
      * @param string $id

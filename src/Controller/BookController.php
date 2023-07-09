@@ -13,17 +13,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @Route(path="/books")
- */
+#[Route(path: '/books')]
 class BookController extends BaseController
 {
-    /**
-     * @Route(path="/list", methods={"GET"}, name="app_books_list")
-     * @param Request $request
-     * @param BookManager $manager
-     * @return Response
-     */
+    #[Route(path: '/list', name: 'app_books_list', methods: ['GET'])]
     public function booksListAction(Request $request, BookManager $manager): Response
     {
         try {
@@ -32,10 +25,7 @@ class BookController extends BaseController
             $books = $manager->findBy($filters);
         } catch (AppException $e) {
             $books = new PaginatedDataModel();
-            $this->addFlash(
-                'danger',
-                $this->translator->trans($e->getMessage())
-            );
+            $this->addFlash('danger', $this->translator->trans($e->getMessage()));
         }
 
         return $this->render('book/list.html.twig', [
@@ -53,6 +43,10 @@ class BookController extends BaseController
      * @param string|null $id
      * @return Response
      */
+    #[
+        Route(path: '/create', name: 'app_book_create', methods: ['GET', 'POST']),
+        Route(path: '/edit/{id}', name: 'app_book_edit', methods: ['GET', 'POST'])
+    ]
     public function bookEditAction(Request $request, BookManager $manager, ?string $id = null): Response
     {
         try {
@@ -68,9 +62,7 @@ class BookController extends BaseController
                 ]);
             }
 
-            $form = $this->createForm(BookType::class, $model, [
-                'em' => $this->getDoctrine()->getManager(),
-            ]);
+            $form = $this->createForm(BookType::class, $model);
             $form->handleRequest($request);
 
             if ($form->isSubmitted() && $form->isValid()) {
@@ -78,21 +70,16 @@ class BookController extends BaseController
 
                 if ($id === null) {
                     $book = $manager->create($model->author, $model->name, $model->price);
-                    $bookTitle = $book->getName() . ' (' . $book->getAuthor()->getName() . ')';
-                    $this->addFlash('success', 'Book "' . $bookTitle . '" created');
+                    $this->addFlash('success', "Book \"{$book->getNameWithAuthor()}\" created");
                 } else {
                     $book = $manager->edit($id, $model->author, $model->name, $model->price);
-                    $bookTitle = $book->getName() . ' (' . $book->getAuthor()->getName() . ')';
-                    $this->addFlash('success', 'Book "' . $bookTitle . '" saved');
+                    $this->addFlash('success', "Book \"{$book->getNameWithAuthor()}\" saved");
                 }
 
                 return $this->redirectToRoute('app_books_list');
             }
         } catch (AppException $e) {
-            $this->addFlash(
-                'danger',
-                $this->translator->trans($e->getMessage())
-            );
+            $this->addFlash('danger', $this->translator->trans($e->getMessage()));
 
             return $this->redirectToRoute('app_books_list');
         }
@@ -103,21 +90,13 @@ class BookController extends BaseController
         ]);
     }
 
-    /**
-     * @Route(path="/delete/{id}", methods={"GET","POST"}, name="app_book_delete")
-     * @param string $id
-     * @param BookManager $manager
-     * @return Response
-     */
+    #[Route(path: '/delete/{id}', name: 'app_book_delete', methods: ['GET', 'POST'])]
     public function bookDeleteAction(BookManager $manager, string $id): Response
     {
         try {
             $manager->delete($id);
         } catch (AppException $e) {
-            $this->addFlash(
-                'danger',
-                $this->translator->trans($e->getMessage())
-            );
+            $this->addFlash('danger', $this->translator->trans($e->getMessage()));
         }
 
         return $this->redirectToRoute('app_books_list');

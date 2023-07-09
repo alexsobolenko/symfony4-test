@@ -4,27 +4,12 @@ declare(strict_types=1);
 
 namespace App\Model;
 
-class PaginatedDataModel
+final class PaginatedDataModel
 {
     /**
      * @var int
      */
-    public int $total;
-
-    /**
-     * @var int
-     */
     public int $pages;
-
-    /**
-     * @var int
-     */
-    public int $limit;
-
-    /**
-     * @var int
-     */
-    public int $page;
 
     /**
      * @var int|null
@@ -39,11 +24,6 @@ class PaginatedDataModel
     /**
      * @var array
      */
-    public array $items;
-
-    /**
-     * @var array
-     */
     public array $pageItems;
 
     /**
@@ -52,13 +32,13 @@ class PaginatedDataModel
      * @param int $page
      * @param array $items
      */
-    public function __construct(int $total = 0, int $limit = 10, int $page = 1, array $items = [])
-    {
+    public function __construct(
+        public int $total = 0,
+        public int $limit = 10,
+        public int $page = 1,
+        public array $items = []
+    ) {
         $this->pageItems = [1];
-        $this->total = $total;
-        $this->limit = $limit;
-        $this->page = $page;
-        $this->items = $items;
         $this->pages = 0;
         $this->prev = null;
         $this->next = null;
@@ -117,7 +97,7 @@ class PaginatedDataModel
                     $this->pageItems[] = '...';
                 }
 
-                if (!in_array($this->pages, $this->pageItems)) {
+                if (!in_array($this->pages, $this->pageItems, true)) {
                     $this->pageItems[] = $this->pages;
                 }
             }

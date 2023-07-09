@@ -12,20 +12,14 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class AuthorType extends AbstractType
+final class AuthorType extends AbstractType
 {
-    /**
-     * @var TranslatorInterface
-     */
-    protected TranslatorInterface $translator;
-
     /**
      * @param TranslatorInterface $translator
      */
-    public function __construct(TranslatorInterface $translator)
-    {
-        $this->translator = $translator;
-    }
+    public function __construct(
+        private readonly TranslatorInterface $translator
+    ) {}
 
     /**
      * @param FormBuilderInterface $builder

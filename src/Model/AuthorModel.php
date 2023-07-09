@@ -9,22 +9,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class AuthorModel
 {
-    /**
-     * @var string|null
-     * @Assert\NotBlank(message="Name should not be blank")
-     * @Assert\Length(
-     *      min=2,
-     *      max=100,
-     *      minMessage="Name must be at least {{ limit }} characters long",
-     *      maxMessage="Name cannot be longer than {{ limit }} characters"
-     * )
-     */
-    public $name;
-
-    public function __construct()
-    {
-        $this->name = null;
-    }
+    #[
+        Assert\NotBlank(message: 'error.name_is_blank'),
+        Assert\Length(min: 2, max: 100, minMessage: 'error.name_length_min', maxMessage: 'error.name_length_max')
+    ]
+    public ?string $name = null;
 
     /**
      * @param Author $entity

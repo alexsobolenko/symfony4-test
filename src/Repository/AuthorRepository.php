@@ -5,16 +5,12 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\Author;
+use App\Exception\AppException;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @method Author|null find($id, $lockMode = null, $lockVersion = null)
- * @method Author|null findOneBy(array $criteria, array $orderBy = null)
- * @method Author[]    findAll()
- * @method Author[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- */
 class AuthorRepository extends ServiceEntityRepository
 {
     /**
@@ -38,13 +34,18 @@ class AuthorRepository extends ServiceEntityRepository
     /**
      * @param array $filters
      * @return int
+     * @throws AppException
      */
     public function countByFilter(array $filters): int
     {
         $qb = $this->createQuery($filters);
         $qb->select('COUNT(a.id)');
 
-        return (int) $qb->getQuery()->getSingleScalarResult();
+        try {
+            return (int) $qb->getQuery()->getSingleScalarResult();
+        } catch (ORMException $e) {
+            throw new AppException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     /**
@@ -52,6 +53,7 @@ class AuthorRepository extends ServiceEntityRepository
      * @param int $page
      * @param int $limit
      * @return array
+     * @throws AppException
      */
     public function findByFilter(array $filters, int $page, int $limit): array
     {
@@ -62,7 +64,11 @@ class AuthorRepository extends ServiceEntityRepository
 
         $qb->addOrderBy('a.name', 'ASC');
 
-        return $qb->getQuery()->getResult();
+        try {
+            return $qb->getQuery()->getResult();
+        } catch (ORMException $e) {
+            throw new AppException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     /**
@@ -71,10 +77,8 @@ class AuthorRepository extends ServiceEntityRepository
      */
     private function createQuery(array $filters): QueryBuilder
     {
-        $name = $filters['name'] ?? null;
-
         $qb = $this->createQueryBuilder('a');
-
+        $name = $filters['name'] ?? null;
         if ($name) {
             $qb->andWhere($qb->expr()->like('a.name', ':name'));
             $qb->setParameter('name', '%' . $name . '%');

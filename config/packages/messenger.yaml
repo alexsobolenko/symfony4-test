@@ -1,0 +1,22 @@
+framework:
+    messenger:
+        failure_transport: failed
+
+        transports:
+            async:
+                dsn: 'doctrine://default'
+                retry_strategy:
+                    max_retries: 10
+                    delay: 1000
+                    max_delay: 30000
+                    multiplier: 4
+            failed:
+                dsn: 'doctrine://default?queue_name=failed'
+                retry_strategy:
+                    max_retries: 20
+                    delay: 300000
+                    max_delay: 86400000
+                    multiplier: 3
+
+        routing:
+            'Symfony\Component\Mailer\Messenger\SendEmailMessage': async
